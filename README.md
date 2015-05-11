@@ -25,7 +25,7 @@ smcs.exe receives and redirects compilations requests from Unity to one of the a
 * I have no idea what problems this hack may introduce. I hope none, but it needs to be tested.
 
 
-* Roslyn compiler was built from the sources available at its [official repository on GitHub][roslyn]. No changes made.
+* Roslyn compiler was built from the sources available on its [official repository on GitHub][roslyn]. No changes made.
 
 
 * `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation.
