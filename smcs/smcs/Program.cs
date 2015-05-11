@@ -190,8 +190,9 @@ internal class Program
 	private static string GetUnityEditorDataDir(string[] compilationOptions)
 	{
 		var filename = compilationOptions.First(line => line.Contains("UnityEngine.dll")).Substring(3).Trim('\"');
-		var dir = Directory.GetParent(filename).Parent;
-		return dir.FullName;
+		var index = filename.IndexOf("Data");
+		filename = filename.Substring(0, index + "Data".Length);
+		return filename;
 	}
 
 	private static string[] GetCompilationOptions(string[] args)
