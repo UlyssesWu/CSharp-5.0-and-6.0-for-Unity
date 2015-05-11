@@ -132,7 +132,7 @@ internal class Program
 		}
 	}
 
-	private const string LOG_FILENAME = "log.txt";
+	private const string LOG_FILENAME = "compilation log.txt";
 
 	[Conditional("LOG")]
 	private static void InitLog()
