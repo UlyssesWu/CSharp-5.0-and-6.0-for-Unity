@@ -1,6 +1,6 @@
 # How to use? #
 
-1. Copy `smcs\smcs\bin\Release\smcs.exe` from this repositoty to your `\Unity\Editor\Data\Mono\lib\mono\2.0` folder. Just copy, there's nothing to replace.
+1. Copy `smcs\smcs\bin\Release\smcs.exe` from this repository to your `\Unity\Editor\Data\Mono\lib\mono\2.0` folder. Just copy, there's nothing to replace.
 
 2. Create a new or open an old Unity project. Switch `Project Settings`/`Player`/`API Compatibility Level` option to `.Net 2.0`.
 
