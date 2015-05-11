@@ -31,7 +31,7 @@ smcs.exe receives and redirects compilations requests from Unity to one of the a
 * `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation.
 
 
-* AsyncBridge is a set of types that makes it possible to use async/await in projects that target CLR2.0. [More details][asyncbridge]
+* AsyncBridge library provides a set of types that makes it possible to use async/await in projects that target CLR2.0. For more information, check [this blog post][asyncbridge].
 
 
 * If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. It's most likely that this is not what you want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example provided with this project.
