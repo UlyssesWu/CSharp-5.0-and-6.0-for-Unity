@@ -26,7 +26,7 @@ The source code is released under [WTFPL version 2](http://www.wtfpl.net/about/)
 
 # Want to talk about it? #
 
-http://forum.unity3d.com/threads/c-6-0.314297/
+http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 # Random notes #
 
