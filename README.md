@@ -2,7 +2,7 @@
 
 1. Copy `smcs\smcs\bin\Release\smcs.exe` from this repository to your `\Unity\Editor\Data\Mono\lib\mono\2.0` folder. Just copy, there's nothing to replace.
 
-2. Create a new or open an old Unity project. Switch `Project Settings`/`Player`/`API Compatibility Level` option to `.Net 2.0`.
+2. Create a new or open an old Unity project. Make sure that `Project Settings`/`Player`/`API Compatibility Level` is set to `.Net 2.0`.
 
 3. Copy `mcs.exe` or `Roslyn` folder to your project's root folder.
 
@@ -36,9 +36,9 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
-* AsyncBridge library provides a set of types that makes it possible to use async/await in projects that target CLR2.0. For more information, check [this blog post][asyncbridge].
+* AsyncBridge library provides a set of types that makes it possible to use _async/await_ in projects that target CLR2.0. For more information, check [this blog post][asyncbridge].
 
-* If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example provided with this project.
+* If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you would want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example provided with this project.
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [1][synccontext1], [2][synccontext2], [3][synccontext3].
 
