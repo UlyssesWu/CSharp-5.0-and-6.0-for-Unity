@@ -18,4 +18,4 @@ smcs.exe receives and redirects compilations requests from Unity to one of the a
 
 3. else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be called (\Unity\Editor\Data\MonoBleedingEdge\lib\mono\4.5\mcs.exe);
 
-4. else the stock compiler will be called.
+4. else the stock compiler will be called (\Unity\Editor\Data\Mono\lib\mono\2.0\gmcs.exe).
