@@ -19,3 +19,12 @@ smcs.exe receives and redirects compilations requests from Unity to one of the a
 3. else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be called (\Unity\Editor\Data\MonoBleedingEdge\lib\mono\4.5\mcs.exe);
 
 4. else the stock compiler will be called (\Unity\Editor\Data\Mono\lib\mono\2.0\gmcs.exe).
+
+# Random notes #
+
+* I have no idea what problems this hack may introduce. I hope none, but it needs to be tested.
+* Roslyn compiler was built from the sources available at its [official repository on GitHub][roslyn]. No changes made.
+* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation.
+
+[mono]: http://www.mono-project.com/download/#download-win
+[roslyn]: https://github.com/dotnet/roslyn
