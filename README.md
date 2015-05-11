@@ -22,21 +22,17 @@ smcs.exe receives and redirects compilation requests from Unity to one of the av
 
 # License #
 
-The code is released under [WTFPL version 2](http://www.wtfpl.net/about/).
+The source code is released under [WTFPL version 2](http://www.wtfpl.net/about/).
 
 # Random notes #
 
 * I have no idea what problems this hack may introduce. I hope none, but it needs to be tested.
 
-
 * Roslyn compiler was built from the sources available on its [official repository on GitHub][roslyn]. No changes made.
 
-
-* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation.
-
+* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
 * AsyncBridge library provides a set of types that makes it possible to use async/await in projects that target CLR2.0. For more information, check [this blog post][asyncbridge].
-
 
 * If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. It's most likely that this is not what you want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example provided with this project.
 
