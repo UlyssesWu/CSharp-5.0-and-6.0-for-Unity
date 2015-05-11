@@ -52,14 +52,44 @@ internal class Program
 			string output = process.StandardOutput.ReadToEnd();
 			string error = process.StandardError.ReadToEnd();
 			process.WaitForExit();
+			Log($"Exit code: {process.ExitCode}");
 
-			Console.Error.Write(error);
-			Console.Out.Write(output);
+			if (compilerVersion == CompilerVersion.Version6)
+			{
+				output = output.Replace("\r\n", "\n");
+				error = error.Replace("\r\n", "\n");
 
+				if (process.ExitCode != 0)
+				{
+					Console.Error.Write(output);
+					Console.Error.Write(error);
+				}
+				else
+				{
+					Console.Error.Write(error);
+					Console.Out.Write(output);
+				}
+			}
+			else
+			{
+				Console.Error.Write(error);
+				Console.Out.Write(output);
+			}
+
+#if LOG
 			Log("\n- Compiler output: ------");
-			Log(output);
+			var lines = output.Split('\n');
+			for (int i = 0; i < lines.Length; i++)
+			{
+				Log($"output{i}: {lines[i]}");
+			}
 			Log("\n- Compiler errors: ------");
-			Log(error);
+			lines = error.Split('\n', '\r');
+			for (int i = 0; i < lines.Length; i++)
+			{
+				Log($"output{i}: {lines[i]}");
+			}
+#endif
 
 			if (process.ExitCode != 0 || compilerVersion != CompilerVersion.Version6)
 			{
