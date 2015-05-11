@@ -1,0 +1,11 @@
+syntax: glob
+
+*.suo
+*.sln
+*.csproj
+*.unityproj
+*.user
+Library/
+Temp/
+bin/
+obj/
