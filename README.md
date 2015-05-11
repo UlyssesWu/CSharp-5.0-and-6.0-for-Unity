@@ -38,7 +38,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * AsyncBridge library provides a set of types that makes it possible to use async/await in projects that target CLR2.0. For more information, check [this blog post][asyncbridge].
 
-* If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. It's most likely that this is not what you want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example provided with this project.
+* If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example provided with this project.
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [1][synccontext1], [2][synccontext2], [3][synccontext3].
 
