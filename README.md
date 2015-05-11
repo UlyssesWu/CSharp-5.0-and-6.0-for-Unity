@@ -24,6 +24,10 @@ smcs.exe receives and redirects compilation requests from Unity to one of the av
 
 The source code is released under [WTFPL version 2](http://www.wtfpl.net/about/).
 
+# Want to talk about it? #
+
+http://forum.unity3d.com/threads/c-6-0.314297/
+
 # Random notes #
 
 * I have no idea what problems this hack may introduce. I hope none, but it needs to be tested.
