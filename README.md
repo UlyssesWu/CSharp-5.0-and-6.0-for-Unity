@@ -10,7 +10,7 @@ That's all.
 
 # How does it work? #
 
-smcs.exe receives and redirects compilations requests from Unity to one of the available C# compilers using the following rules:
+smcs.exe receives and redirects compilation requests from Unity to one of the available C# compilers using the following rules:
 
 1. If the current project contains `Roslyn` folder, then this Roslyn C# 6.0 compiler will be called;
 
