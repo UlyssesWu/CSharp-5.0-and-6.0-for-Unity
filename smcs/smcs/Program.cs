@@ -1,4 +1,4 @@
-﻿//#define LOG
+﻿#define LOG
 
 using System;
 using System.Diagnostics;
@@ -11,7 +11,8 @@ internal class Program
 	{
 		Version3,
 		Version5,
-		Version6,
+		Version6Microsoft,
+		Version6Mono,
 	}
 
 	private static int Main(string[] args)
@@ -28,7 +29,11 @@ internal class Program
 			CompilerVersion compilerVersion;
 			if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Roslyn")))
 			{
-				compilerVersion = CompilerVersion.Version6;
+				compilerVersion = CompilerVersion.Version6Microsoft;
+			}
+			else if (File.Exists("mcs.exe"))
+			{
+				compilerVersion = CompilerVersion.Version6Mono;
 			}
 			else if (compilationOptions.Any(line => line.Contains("AsyncBridge.Net35.dll")))
 			{
@@ -54,7 +59,7 @@ internal class Program
 			process.WaitForExit();
 			Log($"Exit code: {process.ExitCode}");
 
-			if (compilerVersion == CompilerVersion.Version6)
+			if (compilerVersion == CompilerVersion.Version6Microsoft)
 			{
 				output = output.Replace("\r\n", "\n");
 				error = error.Replace("\r\n", "\n");
@@ -87,16 +92,16 @@ internal class Program
 			lines = error.Split('\n', '\r');
 			for (int i = 0; i < lines.Length; i++)
 			{
-				Log($"output{i}: {lines[i]}");
+				Log($"error{i}: {lines[i]}");
 			}
 #endif
 
-			if (process.ExitCode != 0 || compilerVersion != CompilerVersion.Version6)
+			if (process.ExitCode != 0 || compilerVersion != CompilerVersion.Version6Microsoft)
 			{
 				return process.ExitCode;
 			}
 
-			Log("- Symbol DB convertion: -");
+			Log("\n- Symbol DB convertion: -");
 
 			var pdb2mdbPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/pdb2mdb.exe");
 			var libraryPath = Directory.GetFiles("Temp", "*.dll").First();
@@ -161,7 +166,12 @@ internal class Program
 				processArguments = $"-sdk:2 -langversion:Future -r:\"{systemCoreDllPath}\" {responseFile}";
 				break;
 
-			case CompilerVersion.Version6:
+			case CompilerVersion.Version6Mono:
+				processPath = Path.Combine(Directory.GetCurrentDirectory(), "mcs.exe");
+				processArguments = $"-sdk:2 -r:\"{systemCoreDllPath}\" {responseFile}";
+				break;
+
+			case CompilerVersion.Version6Microsoft:
 				processPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/csc.exe");
 				var mscorlib = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
 				processArguments = $"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemCoreDllPath}\" {responseFile}";

@@ -26,6 +26,9 @@ public class AsyncTest : MonoBehaviour
 
 		PrintThreadId();
 		Debug.Log("Finish");
+
+		var x = 100;
+		Debug.Log($"x={x}");
 	}
 
 	private static void PrintThreadId()
