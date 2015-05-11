@@ -20,6 +20,10 @@ smcs.exe receives and redirects compilations requests from Unity to one of the a
 
 4. else the stock compiler will be called (\Unity\Editor\Data\Mono\lib\mono\2.0\gmcs.exe).
 
+# License #
+
+The code is released under [WTFPL version 2](http://www.wtfpl.net/about/).
+
 # Random notes #
 
 * I have no idea what problems this hack may introduce. I hope none, but it needs to be tested.
