@@ -2,7 +2,7 @@
 
 Yes, you can.
 
-Unity has being stuck with CLR v2.0 for a very long time, but almost all the latest C# features do not require the latest versions of CLR. Microsoft and Mono compilers can compile C# 6.0 code for CLR v2.0 if you explicitly ask them to do so.
+Unity has being stuck with CLR 2.0 for a very long time, but almost all the latest C# features do not require the latest versions of CLR. Microsoft and Mono compilers can compile C# 6.0 code for CLR 2.0 if you explicitly ask them to do so.
 
 Late binding (`dynamic`) feature that came with C# 4.0 still won't be available in Unity, because it relies on CLR 4.0 that we don't have yet.
 
@@ -44,7 +44,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
-* AsyncBridge library provides a set of types that makes it possible to use _async/await_ in projects that target CLR2.0. For more information, check [this blog post][asyncbridge].
+* AsyncBridge library provides a set of types that makes it possible to use _async/await_ in projects that target CLR 2.0. For more information, check [this blog post][asyncbridge].
 
 * If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you would want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example located inside the project.
 
