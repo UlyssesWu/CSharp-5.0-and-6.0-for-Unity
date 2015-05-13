@@ -50,7 +50,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [1][synccontext1], [2][synccontext2], [3][synccontext3].
 
-* It looks like the Mono's 4.0.0 compiler doesn't fully understand null-conditional operatos:
+* It looks like the Mono's 4.0.0 compiler doesn't fully understand null-conditional operators:
 
         var foo = new[] { 1, 2, 3 };
         var bar = foo?[0];
