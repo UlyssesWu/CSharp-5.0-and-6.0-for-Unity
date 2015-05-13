@@ -1,6 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class UnityScheduler : MonoBehaviour
@@ -38,5 +40,23 @@ public class UnitySynchronizationContext : SynchronizationContext
 		{
 			workItem.Key(workItem.Value);
 		}
+	}
+}
+
+internal class UnityTaskScheduler : TaskScheduler
+{
+	protected override IEnumerable<Task> GetScheduledTasks()
+	{
+		throw new NotImplementedException();
+	}
+
+	protected override void QueueTask(Task task)
+	{
+		throw new NotImplementedException();
+	}
+
+	protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+	{
+		throw new NotImplementedException();
 	}
 }
