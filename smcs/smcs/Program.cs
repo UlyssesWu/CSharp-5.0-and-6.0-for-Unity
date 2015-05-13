@@ -151,7 +151,9 @@ internal class Program
 		string processPath;
 		string processArguments;
 
+		var systemDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.dll");
 		var systemCoreDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Core.dll");
+		var systemXmlDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Xml.dll");
 
 		switch (version)
 		{
@@ -174,7 +176,7 @@ internal class Program
 			case CompilerVersion.Version6Microsoft:
 				processPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/csc.exe");
 				var mscorlib = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
-				processArguments = $"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemCoreDllPath}\" {responseFile}";
+				processArguments = $"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemDllPath}\" -r:\"{systemCoreDllPath}\" -r:\"{systemXmlDllPath}\" {responseFile}";
 				break;
 
 			default:
