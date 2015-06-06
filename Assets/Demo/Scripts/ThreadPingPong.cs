@@ -23,7 +23,8 @@ internal class ThreadPingPong : MonoBehaviour
 		var task3 = new Task(WhereAmI); // background thread
 		task3.Start(TaskScheduler.Default);
 
-		// returns execution of acynchronous method to the main thead if it was originally called from the main thread
+		// returns execution of acynchronous method to the main thread,
+		// if it was originally called from the main thread
 		await TaskEx.WhenAll(task1, task2, task3);
 
 		WhereAmI(); // main thread
