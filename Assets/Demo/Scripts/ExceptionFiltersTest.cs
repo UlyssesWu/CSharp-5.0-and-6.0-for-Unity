@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
 
-internal class ExeptionFiltersTest : MonoBehaviour
+#warning IL2CPP may fail this test
+internal class ExceptionFiltersTest : MonoBehaviour
 {
 	private class MyException : Exception
 	{
