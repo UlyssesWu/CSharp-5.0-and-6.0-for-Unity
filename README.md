@@ -22,7 +22,7 @@ smcs.exe receives and redirects compilation requests from Unity to one of the av
 
 1. If the current project contains `Roslyn` folder, then Roslyn C# 6.0 compiler will be used;
 
-2. else if the current project contains `mcs.exe`, then this Mono's 4.0.0 C# 6.0 compiler will be used;
+2. else if the current project contains `mcs.exe`, then this Mono's 4.0.2 C# 6.0 compiler will be used;
 
 3. else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be used (\Unity\Editor\Data\MonoBleedingEdge\lib\mono\4.5\mcs.exe);
 
@@ -42,7 +42,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * Roslyn compiler was built from the sources available on its [official repository on GitHub][roslyn]. No changes made.
 
-* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.0][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
+* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.2][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
 * AsyncBridge library provides a set of types that makes it possible to use _async/await_ in projects that target CLR 2.0. For more information, check [this blog post][asyncbridge].
 
@@ -50,7 +50,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [1][synccontext1], [2][synccontext2], [3][synccontext3].
 
-* It looks like the Mono's 4.0.0 compiler doesn't fully understand null-conditional operators:
+* It looks like the Mono 4.0.2 compiler doesn't fully understand null-conditional operators:
 
         var foo = new[] { 1, 2, 3 };
         var bar = foo?[0];
@@ -62,3 +62,5 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 [synccontext1]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx
 [synccontext2]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/21/10259307.aspx
 [synccontext3]: http://blogs.msdn.com/b/pfxteam/archive/2012/02/02/await-synchronizationcontext-and-console-apps-part-3.aspx
+
+* And there's one more thing, related to read-only property initialization, that Mono compiler doesn't understand. See PropertyInitializerTest.cs for the details.
