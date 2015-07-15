@@ -102,7 +102,7 @@ internal class Program
 				return process.ExitCode;
 			}
 
-			Log("\n- PDB to MDB convertion --------------------------------------\n");
+			Log("\n- PDB to MDB conversion --------------------------------------\n");
 
 			var pdb2mdbPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/pdb2mdb.exe");
 			var libraryPath = Directory.GetFiles("Temp", "*.dll").First();
