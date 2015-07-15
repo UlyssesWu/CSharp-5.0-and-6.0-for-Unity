@@ -225,7 +225,7 @@ GameObject:
   - 4: {fileID: 212453714}
   - 114: {fileID: 212453713}
   m_Layer: 0
-  m_Name: ExeptionFiltersTest
+  m_Name: ExceptionFiltersTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -239,7 +239,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 212453712}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84f94b387097b0149b726bb2759e285c, type: 3}
+  m_Script: {fileID: 11500000, guid: 32170e621cead964799a16b7a02f71e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &212453714
@@ -609,6 +609,7 @@ MonoBehaviour:
   m_SubmitButton: Submit
   m_CancelButton: Cancel
   m_InputActionsPerSecond: 10
+  m_RepeatDelay: .5
   m_AllowActivationOnMobileDevice: 0
 --- !u!114 &924430270
 MonoBehaviour:
@@ -902,6 +903,7 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: .0219999999
+  m_StereoMirrorMode: 0
 --- !u!4 &1125801995
 Transform:
   m_ObjectHideFlags: 0
