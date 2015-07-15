@@ -1,4 +1,4 @@
-﻿#define LOG
+﻿#define LOGGING_ENABLED
 
 using System;
 using System.Diagnostics;
@@ -14,6 +14,8 @@ internal class Program
 		Version6Microsoft,
 		Version6Mono,
 	}
+
+	private const string LOG_FILENAME = "compilation log.txt";
 
 	private static int Main(string[] args)
 	{
@@ -44,7 +46,9 @@ internal class Program
 				compilerVersion = CompilerVersion.Version3;
 			}
 			Log($"Compiler: {compilerVersion}");
+			Log("\n- Compilation -----------------------------------------------\n");
 
+			var stopwatch = Stopwatch.StartNew();
 			var process = CreateCompilerProcess(compilerVersion, unityEditorDataDir, args[0]);
 			process.StartInfo.RedirectStandardError = true;
 			process.StartInfo.RedirectStandardOutput = true;
@@ -54,54 +58,51 @@ internal class Program
 			Log($"Process: {process.StartInfo.FileName}");
 			Log($"Arguments: {process.StartInfo.Arguments}");
 
-			string output = process.StandardOutput.ReadToEnd();
-			string error = process.StandardError.ReadToEnd();
+			string sourceOutput = process.StandardOutput.ReadToEnd();
+			string sourceError = process.StandardError.ReadToEnd();
 			process.WaitForExit();
+			stopwatch.Stop();
 			Log($"Exit code: {process.ExitCode}");
+			Log($"Elapsed time: {stopwatch.ElapsedMilliseconds/1000f:F2} sec");
+
+			var outputLines = sourceOutput.Replace("\r\n", "\n").Split('\n').ToList();
+			var errorLines = sourceError.Replace("\r\n", "\n").Split('\n').ToList();
 
 			if (compilerVersion == CompilerVersion.Version6Microsoft)
 			{
-				output = output.Replace("\r\n", "\n");
-				error = error.Replace("\r\n", "\n");
+				// Since Microsoft's compiler writes all warnings and errors to the standard output channel,
+				// move them to the error channel
 
-				if (process.ExitCode != 0)
+				while (outputLines.Count > 4)
 				{
-					Console.Error.Write(output);
-					Console.Error.Write(error);
-				}
-				else
-				{
-					Console.Error.Write(error);
-					Console.Out.Write(output);
+					var line = outputLines[3];
+					outputLines.RemoveAt(3);
+					errorLines.Add(line);
 				}
 			}
-			else
+
+			Log("\n- Compiler output:");
+			for (int i = 0; i < outputLines.Count; i++)
 			{
-				Console.Error.Write(error);
-				Console.Out.Write(output);
+				var line = outputLines[i];
+				Console.Out.WriteLine(line);
+				Log($"{i}: {line}");
 			}
 
-#if LOG
-			Log("\n- Compiler output: ------");
-			var lines = output.Split('\n');
-			for (int i = 0; i < lines.Length; i++)
+			Log("\n- Compiler errors:");
+			for (int i = 0; i < errorLines.Count; i++)
 			{
-				Log($"output{i}: {lines[i]}");
+				var line = errorLines[i];
+				Console.Error.WriteLine(line);
+				Log($"{i}: {line}");
 			}
-			Log("\n- Compiler errors: ------");
-			lines = error.Split('\n', '\r');
-			for (int i = 0; i < lines.Length; i++)
-			{
-				Log($"error{i}: {lines[i]}");
-			}
-#endif
 
 			if (process.ExitCode != 0 || compilerVersion != CompilerVersion.Version6Microsoft)
 			{
 				return process.ExitCode;
 			}
 
-			Log("\n- Symbol DB convertion: -");
+			Log("\n- PDB to MDB convertion --------------------------------------\n");
 
 			var pdb2mdbPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/pdb2mdb.exe");
 			var libraryPath = Directory.GetFiles("Temp", "*.dll").First();
@@ -121,7 +122,7 @@ internal class Program
 			process.WaitForExit();
 			File.Delete(pdbPath);
 
-			Log("\n- pdb2mdb.exe output: ---");
+			Log("\n- pdb2mdb.exe output:");
 			Log(process.StandardOutput.ReadToEnd());
 			return 0;
 		}
@@ -132,15 +133,37 @@ internal class Program
 		}
 	}
 
-	private const string LOG_FILENAME = "compilation log.txt";
-
-	[Conditional("LOG")]
+	[Conditional("LOGGING_ENABLED")]
 	private static void InitLog()
 	{
-		File.WriteAllText(LOG_FILENAME, "");
+		var dateTimeString = DateTime.Now.ToString("F");
+		var middleLine = "*" + new string(' ', 78) + "*";
+		int index = (80 - dateTimeString.Length) / 2;
+		middleLine = middleLine.Remove(index, dateTimeString.Length).Insert(index, dateTimeString);
+
+		string header = new string('*', 80) + "\n";
+		header += middleLine + "\n";
+		header += new string('*', 80) + "\n\n";
+
+		if (File.Exists(LOG_FILENAME))
+		{
+			var lastWriteTime = new FileInfo(LOG_FILENAME).LastWriteTimeUtc;
+			if (DateTime.UtcNow - lastWriteTime > TimeSpan.FromMinutes(5))
+			{
+				File.WriteAllText(LOG_FILENAME, header);
+			}
+			else
+			{
+				File.AppendAllText(LOG_FILENAME, header);
+			}
+		}
+		else
+		{
+			File.WriteAllText(LOG_FILENAME, header);
+		}
 	}
 
-	[Conditional("LOG")]
+	[Conditional("LOGGING_ENABLED")]
 	private static void Log(string message)
 	{
 		File.AppendAllText(LOG_FILENAME, message + "\n");
