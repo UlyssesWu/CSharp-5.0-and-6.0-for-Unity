@@ -103,7 +103,7 @@ internal class Program
 				return process.ExitCode;
 			}
 
-			Log("\n- PDB to MDB convertion --------------------------------------\n");
+			Log("\n- PDB to MDB conversion --------------------------------------\n");
 
 			OutputLines.Clear();
 			ErrorLines.Clear();
