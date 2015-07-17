@@ -1,9 +1,11 @@
 ﻿#define LOGGING_ENABLED
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 internal class Program
 {
@@ -12,10 +14,13 @@ internal class Program
 		Version3,
 		Version5,
 		Version6Microsoft,
-		Version6Mono,
+		Version6Mono
 	}
 
 	private const string LOG_FILENAME = "compilation log.txt";
+
+	private static readonly List<string> OutputLines = new List<string>();
+	private static readonly List<string> ErrorLines = new List<string>();
 
 	private static int Main(string[] args)
 	{
@@ -25,6 +30,7 @@ internal class Program
 			var unityEditorDataDir = GetUnityEditorDataDir(compilationOptions);
 
 			InitLog();
+			Log($"smcs.exe version: {Assembly.GetExecutingAssembly().GetName().Version}");
 			Log($"Project directory: {Directory.GetCurrentDirectory()}");
 			Log($"Unity directory: {unityEditorDataDir}");
 
@@ -50,49 +56,44 @@ internal class Program
 
 			var stopwatch = Stopwatch.StartNew();
 			var process = CreateCompilerProcess(compilerVersion, unityEditorDataDir, args[0]);
-			process.StartInfo.RedirectStandardError = true;
-			process.StartInfo.RedirectStandardOutput = true;
-			process.StartInfo.UseShellExecute = false;
-			process.Start();
 
 			Log($"Process: {process.StartInfo.FileName}");
 			Log($"Arguments: {process.StartInfo.Arguments}");
 
-			string sourceOutput = process.StandardOutput.ReadToEnd();
-			string sourceError = process.StandardError.ReadToEnd();
+			process.Start();
+			process.BeginOutputReadLine();
+			process.BeginErrorReadLine();
 			process.WaitForExit();
+
 			stopwatch.Stop();
 			Log($"Exit code: {process.ExitCode}");
-			Log($"Elapsed time: {stopwatch.ElapsedMilliseconds/1000f:F2} sec");
-
-			var outputLines = sourceOutput.Replace("\r\n", "\n").Split('\n').ToList();
-			var errorLines = sourceError.Replace("\r\n", "\n").Split('\n').ToList();
+			Log($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
 
 			if (compilerVersion == CompilerVersion.Version6Microsoft)
 			{
 				// Since Microsoft's compiler writes all warnings and errors to the standard output channel,
 				// move them to the error channel
 
-				while (outputLines.Count > 4)
+				while (OutputLines.Count > 4)
 				{
-					var line = outputLines[3];
-					outputLines.RemoveAt(3);
-					errorLines.Add(line);
+					var line = OutputLines[3];
+					OutputLines.RemoveAt(3);
+					ErrorLines.Add(line);
 				}
 			}
 
 			Log("\n- Compiler output:");
-			for (int i = 0; i < outputLines.Count; i++)
+			for (int i = 0; i < OutputLines.Count; i++)
 			{
-				var line = outputLines[i];
+				var line = OutputLines[i];
 				Console.Out.WriteLine(line);
 				Log($"{i}: {line}");
 			}
 
 			Log("\n- Compiler errors:");
-			for (int i = 0; i < errorLines.Count; i++)
+			for (int i = 0; i < ErrorLines.Count; i++)
 			{
-				var line = errorLines[i];
+				var line = ErrorLines[i];
 				Console.Error.WriteLine(line);
 				Log($"{i}: {line}");
 			}
@@ -104,26 +105,41 @@ internal class Program
 
 			Log("\n- PDB to MDB convertion --------------------------------------\n");
 
+			OutputLines.Clear();
+			ErrorLines.Clear();
+
 			var pdb2mdbPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/pdb2mdb.exe");
 			var libraryPath = Directory.GetFiles("Temp", "*.dll").First();
 			var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(Directory.GetFiles("Temp", "*.dll").First()) + ".pdb");
 
-			process = new Process();
-			process.StartInfo.FileName = pdb2mdbPath;
-			process.StartInfo.Arguments = libraryPath;
-			process.StartInfo.UseShellExecute = false;
-			process.StartInfo.RedirectStandardOutput = true;
-			process.StartInfo.CreateNoWindow = true;
+			process = new Process
+			{
+				StartInfo =
+						  {
+							  FileName = pdb2mdbPath,
+							  Arguments = libraryPath,
+							  UseShellExecute = false,
+							  RedirectStandardOutput = true,
+							  CreateNoWindow = true,
+						  }
+			};
+
+			process.OutputDataReceived += Process_OutputDataReceived;
 
 			Log($"Process: {process.StartInfo.FileName}");
 			Log($"Arguments: {process.StartInfo.Arguments}");
 
 			process.Start();
+			process.BeginOutputReadLine();
 			process.WaitForExit();
+
 			File.Delete(pdbPath);
 
 			Log("\n- pdb2mdb.exe output:");
-			Log(process.StandardOutput.ReadToEnd());
+			foreach (var line in OutputLines)
+			{
+				Log(line);
+			}
 			return 0;
 		}
 		catch (Exception e)
@@ -131,6 +147,16 @@ internal class Program
 			Console.Error.Write($"Compiler redirection error: {e.Message}\n{e.StackTrace}");
 			return -1;
 		}
+	}
+
+	private static void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+	{
+		OutputLines.Add(e.Data);
+	}
+
+	private static void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+	{
+		ErrorLines.Add(e.Data);
 	}
 
 	[Conditional("LOGGING_ENABLED")]
@@ -199,16 +225,29 @@ internal class Program
 			case CompilerVersion.Version6Microsoft:
 				processPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/csc.exe");
 				var mscorlib = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
-				processArguments = $"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemDllPath}\" -r:\"{systemCoreDllPath}\" -r:\"{systemXmlDllPath}\" {responseFile}";
+				processArguments =
+					$"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemDllPath}\" -r:\"{systemCoreDllPath}\" -r:\"{systemXmlDllPath}\" {responseFile}";
 				break;
 
 			default:
 				throw new ArgumentOutOfRangeException(nameof(version), version, null);
 		}
 
-		var process = new Process();
-		process.StartInfo.FileName = processPath;
-		process.StartInfo.Arguments = processArguments;
+		var process = new Process
+		{
+			StartInfo =
+						  {
+							  FileName = processPath,
+							  Arguments = processArguments,
+							  RedirectStandardError = true,
+							  RedirectStandardOutput = true,
+							  UseShellExecute = false
+						  }
+		};
+
+		process.OutputDataReceived += Process_OutputDataReceived;
+		process.ErrorDataReceived += Process_ErrorDataReceived;
+
 		return process;
 	}
 
