@@ -14,7 +14,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
 
-That's all.
+That's it.
 
 # How does it work? #
 
@@ -27,6 +27,8 @@ smcs.exe receives and redirects compilation requests from Unity to one of the av
 3. else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be used (\Unity\Editor\Data\MonoBleedingEdge\lib\mono\4.5\mcs.exe);
 
 4. else the stock compiler will be used (\Unity\Editor\Data\Mono\lib\mono\2.0\gmcs.exe).
+
+It means that Unity will use the alternative compiler only in those projects, where you have explicitely expressed your wish to do so. Otherwise, it will use the stock compiler as usual, and the only bad thing that can happen is if `smcs.exe` crashes for whatever reason instead of doing its job. Then you can just delete it and continue as if nothing ever happened.
 
 # License #
 
@@ -48,7 +50,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you would want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example located inside the project.
 
-    For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [1][synccontext1], [2][synccontext2], [3][synccontext3].
+    For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [one][synccontext1], [two][synccontext2], [three][synccontext3].
 
 * It looks like the Mono 4.0.2 compiler doesn't fully understand null-conditional operators:
 
@@ -63,4 +65,4 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 [synccontext2]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/21/10259307.aspx
 [synccontext3]: http://blogs.msdn.com/b/pfxteam/archive/2012/02/02/await-synchronizationcontext-and-console-apps-part-3.aspx
 
-* And there's one more thing, related to read-only property initialization, that Mono compiler doesn't understand. See PropertyInitializerTest.cs for the details.
+* And there's one more thing that Mono compiler doesn't understand, related to read-only property initialization. See PropertyInitializerTest.cs for the details.

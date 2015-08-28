@@ -129,9 +129,15 @@ internal class Program
 			Log($"Process: {process.StartInfo.FileName}");
 			Log($"Arguments: {process.StartInfo.Arguments}");
 
+			stopwatch.Reset();
+			stopwatch.Start();
+
 			process.Start();
 			process.BeginOutputReadLine();
 			process.WaitForExit();
+
+			stopwatch.Stop();
+			Log($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
 
 			File.Delete(pdbPath);
 
@@ -144,7 +150,7 @@ internal class Program
 		}
 		catch (Exception e)
 		{
-			Console.Error.Write($"Compiler redirection error: {e.Message}\n{e.StackTrace}");
+			Console.Error.Write($"Compiler redirection error: {e.GetType()} {e.Message}\n{e.StackTrace}");
 			return -1;
 		}
 	}
@@ -171,21 +177,14 @@ internal class Program
 		header += middleLine + "\n";
 		header += new string('*', 80) + "\n\n";
 
-		if (File.Exists(LOG_FILENAME))
+		var lastWriteTime = new FileInfo(LOG_FILENAME).LastWriteTimeUtc;
+		if (DateTime.UtcNow - lastWriteTime > TimeSpan.FromMinutes(5))
 		{
-			var lastWriteTime = new FileInfo(LOG_FILENAME).LastWriteTimeUtc;
-			if (DateTime.UtcNow - lastWriteTime > TimeSpan.FromMinutes(5))
-			{
-				File.WriteAllText(LOG_FILENAME, header);
-			}
-			else
-			{
-				File.AppendAllText(LOG_FILENAME, header);
-			}
+			File.WriteAllText(LOG_FILENAME, header);
 		}
 		else
 		{
-			File.WriteAllText(LOG_FILENAME, header);
+			File.AppendAllText(LOG_FILENAME, header);
 		}
 	}
 
