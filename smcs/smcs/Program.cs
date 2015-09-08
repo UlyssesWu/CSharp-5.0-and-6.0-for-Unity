@@ -17,142 +17,181 @@ internal class Program
 		Version6Mono
 	}
 
-	private const string LOG_FILENAME = "compilation log.txt";
-
 	private static readonly List<string> OutputLines = new List<string>();
 	private static readonly List<string> ErrorLines = new List<string>();
 
 	private static int Main(string[] args)
 	{
-		try
+		int exitCode;
+		Logger logger = null;
+
+#if LOGGING_ENABLED
+		logger = new Logger();
+		using (logger)
+#endif
 		{
-			var compilationOptions = GetCompilationOptions(args);
-			var unityEditorDataDir = GetUnityEditorDataDir(compilationOptions);
-
-			InitLog();
-			Log($"smcs.exe version: {Assembly.GetExecutingAssembly().GetName().Version}");
-			Log($"Project directory: {Directory.GetCurrentDirectory()}");
-			Log($"Unity directory: {unityEditorDataDir}");
-
-			CompilerVersion compilerVersion;
-			if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Roslyn")))
+			try
 			{
-				compilerVersion = CompilerVersion.Version6Microsoft;
+				exitCode = Compile(args, logger);
 			}
-			else if (File.Exists("mcs.exe"))
+			catch (Exception e)
 			{
-				compilerVersion = CompilerVersion.Version6Mono;
+				exitCode = -1;
+				Console.Error.Write($"Compiler redirection error: {e.GetType()}{Environment.NewLine}{e.Message} {e.StackTrace}");
 			}
-			else if (compilationOptions.Any(line => line.Contains("AsyncBridge.Net35.dll")))
-			{
-				compilerVersion = CompilerVersion.Version5;
-			}
-			else
-			{
-				compilerVersion = CompilerVersion.Version3;
-			}
-			Log($"Compiler: {compilerVersion}");
-			Log("\n- Compilation -----------------------------------------------\n");
-
-			var stopwatch = Stopwatch.StartNew();
-			var process = CreateCompilerProcess(compilerVersion, unityEditorDataDir, args[0]);
-
-			Log($"Process: {process.StartInfo.FileName}");
-			Log($"Arguments: {process.StartInfo.Arguments}");
-
-			process.Start();
-			process.BeginOutputReadLine();
-			process.BeginErrorReadLine();
-			process.WaitForExit();
-
-			stopwatch.Stop();
-			Log($"Exit code: {process.ExitCode}");
-			Log($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
-
-			if (compilerVersion == CompilerVersion.Version6Microsoft)
-			{
-				// Since Microsoft's compiler writes all warnings and errors to the standard output channel,
-				// move them to the error channel
-
-				while (OutputLines.Count > 4)
-				{
-					var line = OutputLines[3];
-					OutputLines.RemoveAt(3);
-					ErrorLines.Add(line);
-				}
-			}
-
-			Log("\n- Compiler output:");
-			for (int i = 0; i < OutputLines.Count; i++)
-			{
-				var line = OutputLines[i];
-				Console.Out.WriteLine(line);
-				Log($"{i}: {line}");
-			}
-
-			Log("\n- Compiler errors:");
-			for (int i = 0; i < ErrorLines.Count; i++)
-			{
-				var line = ErrorLines[i];
-				Console.Error.WriteLine(line);
-				Log($"{i}: {line}");
-			}
-
-			if (process.ExitCode != 0 || compilerVersion != CompilerVersion.Version6Microsoft)
-			{
-				return process.ExitCode;
-			}
-
-			Log("\n- PDB to MDB conversion --------------------------------------\n");
-
-			OutputLines.Clear();
-			ErrorLines.Clear();
-
-			var pdb2mdbPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/pdb2mdb.exe");
-			var libraryPath = Directory.GetFiles("Temp", "*.dll").First();
-			var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(Directory.GetFiles("Temp", "*.dll").First()) + ".pdb");
-
-			process = new Process
-			{
-				StartInfo =
-						  {
-							  FileName = pdb2mdbPath,
-							  Arguments = libraryPath,
-							  UseShellExecute = false,
-							  RedirectStandardOutput = true,
-							  CreateNoWindow = true,
-						  }
-			};
-
-			process.OutputDataReceived += Process_OutputDataReceived;
-
-			Log($"Process: {process.StartInfo.FileName}");
-			Log($"Arguments: {process.StartInfo.Arguments}");
-
-			stopwatch.Reset();
-			stopwatch.Start();
-
-			process.Start();
-			process.BeginOutputReadLine();
-			process.WaitForExit();
-
-			stopwatch.Stop();
-			Log($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
-
-			File.Delete(pdbPath);
-
-			Log("\n- pdb2mdb.exe output:");
-			foreach (var line in OutputLines)
-			{
-				Log(line);
-			}
-			return 0;
 		}
-		catch (Exception e)
+
+		return exitCode;
+	}
+
+	private static int Compile(string[] args, Logger logger)
+	{
+		logger?.AppendHeader();
+
+		var compilationOptions = GetCompilationOptions(args);
+		var unityEditorDataDir = GetUnityEditorDataDir(compilationOptions);
+		var targetAssembly = compilationOptions.First(line => line.StartsWith("-out:")).Substring(10);
+
+		logger?.Append($"smcs.exe version: {Assembly.GetExecutingAssembly().GetName().Version}");
+		logger?.Append($"Target assembly: {targetAssembly}");
+		logger?.Append($"Project directory: {Directory.GetCurrentDirectory()}");
+		logger?.Append($"Unity directory: {unityEditorDataDir}");
+
+		CompilerVersion compilerVersion;
+		if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Roslyn")))
 		{
-			Console.Error.Write($"Compiler redirection error: {e.GetType()} {e.Message}\n{e.StackTrace}");
-			return -1;
+			compilerVersion = CompilerVersion.Version6Microsoft;
 		}
+		else if (File.Exists("mcs.exe"))
+		{
+			compilerVersion = CompilerVersion.Version6Mono;
+		}
+		else if (compilationOptions.Any(line => line.Contains("AsyncBridge.Net35.dll")))
+		{
+			compilerVersion = CompilerVersion.Version5;
+		}
+		else
+		{
+			compilerVersion = CompilerVersion.Version3;
+		}
+
+		logger?.Append($"Compiler: {compilerVersion}");
+		logger?.Append("");
+		logger?.Append("- Compilation -----------------------------------------------");
+		logger?.Append("");
+
+		var stopwatch = Stopwatch.StartNew();
+		var process = CreateCompilerProcess(compilerVersion, unityEditorDataDir, args[0]);
+
+		logger?.Append($"Process: {process.StartInfo.FileName}");
+		logger?.Append($"Arguments: {process.StartInfo.Arguments}");
+
+		process.Start();
+		process.BeginOutputReadLine();
+		process.BeginErrorReadLine();
+		process.WaitForExit();
+
+		stopwatch.Stop();
+		logger?.Append($"Exit code: {process.ExitCode}");
+		logger?.Append($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
+
+		if (compilerVersion == CompilerVersion.Version6Microsoft)
+		{
+			// Microsoft's compiler writes all warnings and errors to the standard output channel,
+			// so move them to the error channel
+
+			while (OutputLines.Count > 4)
+			{
+				var line = OutputLines[3];
+				OutputLines.RemoveAt(3);
+				ErrorLines.Add(line);
+			}
+		}
+
+		logger?.Append("");
+		logger?.Append("- Compiler output:");
+
+		var lines = from line in OutputLines
+					let trimmedLine = line?.Trim()
+					where string.IsNullOrEmpty(trimmedLine) == false
+					select trimmedLine;
+
+		int lineIndex = 0;
+		foreach (var line in lines)
+		{
+			Console.Out.WriteLine(line);
+			logger?.Append($"{lineIndex++}: {line}");
+		}
+
+		logger?.Append("");
+		logger?.Append("- Compiler errors:");
+
+		lines = from line in ErrorLines
+				let trimmedLine = line?.Trim()
+				where string.IsNullOrEmpty(trimmedLine) == false
+				select trimmedLine;
+
+		lineIndex = 0;
+		foreach (var line in lines)
+		{
+			Console.Error.WriteLine(line);
+			logger?.Append($"{lineIndex++}: {line}");
+		}
+
+		logger?.Append("");
+
+		if (process.ExitCode != 0 || compilerVersion != CompilerVersion.Version6Microsoft)
+		{
+			return process.ExitCode;
+		}
+
+		logger?.Append("- PDB to MDB conversion --------------------------------------");
+		logger?.Append("");
+
+		OutputLines.Clear();
+		ErrorLines.Clear();
+
+		var pdb2mdbPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/pdb2mdb.exe");
+		var libraryPath = Path.Combine("Temp", targetAssembly);
+		var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(targetAssembly) + ".pdb");
+
+		process = new Process
+		{
+			StartInfo =
+					  {
+						  FileName = pdb2mdbPath,
+						  Arguments = libraryPath,
+						  UseShellExecute = false,
+						  RedirectStandardOutput = true,
+						  CreateNoWindow = true,
+					  }
+		};
+
+		process.OutputDataReceived += Process_OutputDataReceived;
+
+		logger?.Append($"Process: {process.StartInfo.FileName}");
+		logger?.Append($"Arguments: {process.StartInfo.Arguments}");
+
+		stopwatch.Reset();
+		stopwatch.Start();
+
+		process.Start();
+		process.BeginOutputReadLine();
+		process.WaitForExit();
+
+		stopwatch.Stop();
+		logger?.Append($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
+
+		File.Delete(pdbPath);
+
+		logger?.Append("");
+		logger?.Append("- pdb2mdb.exe output:");
+		foreach (var line in OutputLines)
+		{
+			logger?.Append(line);
+		}
+
+		return 0;
 	}
 
 	private static void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -163,35 +202,6 @@ internal class Program
 	private static void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
 	{
 		ErrorLines.Add(e.Data);
-	}
-
-	[Conditional("LOGGING_ENABLED")]
-	private static void InitLog()
-	{
-		var dateTimeString = DateTime.Now.ToString("F");
-		var middleLine = "*" + new string(' ', 78) + "*";
-		int index = (80 - dateTimeString.Length) / 2;
-		middleLine = middleLine.Remove(index, dateTimeString.Length).Insert(index, dateTimeString);
-
-		string header = new string('*', 80) + "\n";
-		header += middleLine + "\n";
-		header += new string('*', 80) + "\n\n";
-
-		var lastWriteTime = new FileInfo(LOG_FILENAME).LastWriteTimeUtc;
-		if (DateTime.UtcNow - lastWriteTime > TimeSpan.FromMinutes(5))
-		{
-			File.WriteAllText(LOG_FILENAME, header);
-		}
-		else
-		{
-			File.AppendAllText(LOG_FILENAME, header);
-		}
-	}
-
-	[Conditional("LOGGING_ENABLED")]
-	private static void Log(string message)
-	{
-		File.AppendAllText(LOG_FILENAME, message + "\n");
 	}
 
 	private static Process CreateCompilerProcess(CompilerVersion version, string unityEditorDataDir, string responseFile)
