@@ -70,7 +70,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * IL2CPP (affects iOS and WebGL):
 
-    * Currently fails to process exception filers *(ExceptionFiltersTest.cs)*.
+    * Currently fails to process exception filters *(ExceptionFiltersTest.cs)*.
     * Currently fails to process AsyncBridge library.
 
 * Async/await is not stable on Android. Results may vary - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2188292               
