@@ -42,7 +42,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * I have no idea what problems this hack may introduce. I hope none, but it needs to be tested.
 
-* Roslyn compiler was built from the sources available on its [official repository on GitHub][roslyn]. No changes made.
+* Roslyn compiler was taken from VS 2015 installation.
 
 * `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.4][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
