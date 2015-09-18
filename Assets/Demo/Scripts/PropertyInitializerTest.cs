@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-#warning Mono 4.0.2 compiler fails this test
+#warning Mono 4.0.3 compiler fails this test
 internal class PropertyInitializerTest : MonoBehaviour
 {
 	private string Property1 { get; } = "Hello, World! 111";
@@ -22,7 +22,7 @@ internal class Test
 
 	public Test()
 	{
-		Abc = new Abc(); // Mono 4.0.2 compiler fails here
+		Abc = new Abc(); // Mono 4.0.3 compiler fails here
 			// error CS0118: `Abc' is a `type' but a `variable' was expected
 	}
 }
