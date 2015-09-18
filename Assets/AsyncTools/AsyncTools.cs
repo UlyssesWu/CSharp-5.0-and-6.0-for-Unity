@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -36,7 +37,13 @@ public static class AsyncTools
 
 	public static TaskAwaiter GetAwaiter(this float seconds)
 	{
+		seconds = Math.Max(seconds, .001f); // makes 'await 0f' an equivalent of Unity's 'yield return null'
 		return TaskEx.Delay((int)(seconds * 1000)).GetAwaiter();
+	}
+
+	public static TaskAwaiter GetAwaiter(this int seconds)
+	{
+		return GetAwaiter((float)seconds);
 	}
 
 	public static TaskAwaiter GetAwaiter(this IEnumerable<Task> tasks)
