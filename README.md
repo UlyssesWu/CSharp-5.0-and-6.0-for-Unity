@@ -38,9 +38,44 @@ The source code is released under [WTFPL version 2](http://www.wtfpl.net/about/)
 
 http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
-# Random notes #
+# Known issues #
 
-* I have no idea what problems this hack may introduce. I hope none, but it needs to be tested.
+* Using Mono C# 6.0 compiler may cause Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
+
+* There are cases when Mono compiler fails to compile fully legit C# 6.0 code:
+
+    * Null-conditional operator *(NullConditionalTest.cs)*
+
+            var foo = new[] { 1, 2, 3 };
+            var bar = foo?[0];
+            Debug.Log((foo?[0]).HasValue); // error CS1061: Type `int' does not 
+            // contain a definition for `HasValue' and no extension method
+            // `HasValue' of type `int' could be found. Are you missing an
+            // assembly reference?
+
+        Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
+    
+    * Getter-only auto-property initialization *(PropertyInitializerTest.cs)*
+    
+            class Abc { }
+
+            class Test
+            {
+	           public Abc Abc { get; }
+	           public Test()
+	           {
+		          Abc = new Abc(); // error CS0118: `Abc' is a `type' but a `variable' was expected
+	           }
+            }
+
+* IL2CPP (affect iOS and WebGL):
+
+    * Currently fails to process exception filers *(ExceptionFiltersTest.cs)*.
+    * Currently fails to process AsyncBridge library.
+
+* Async/await is not stable on Android. Results may vary - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2188292               
+
+# Random notes #
 
 * Roslyn compiler was taken from VS 2015 installation.
 
@@ -52,17 +87,9 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [one][synccontext1], [two][synccontext2], [three][synccontext3].
 
-* It looks like Mono C# compiler doesn't fully understand null-conditional operators:
-
-        var foo = new[] { 1, 2, 3 };
-        var bar = foo?[0];
-
-    It thinks that `bar`'s type is `int` while it should be `int?` or `Nullable<int>`.
 [mono]: http://www.mono-project.com/download/#download-win
 [roslyn]: https://github.com/dotnet/roslyn
 [asyncbridge]: https://www.simple-talk.com/blogs/2012/04/18/asyncbridge-write-async-code-for-net-3-5/
 [synccontext1]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx
 [synccontext2]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/21/10259307.aspx
 [synccontext3]: http://blogs.msdn.com/b/pfxteam/archive/2012/02/02/await-synchronizationcontext-and-console-apps-part-3.aspx
-
-* And there's one more thing that Mono compiler doesn't understand, related to read-only property initialization. See PropertyInitializerTest.cs for the details.
