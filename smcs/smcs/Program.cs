@@ -26,8 +26,7 @@ internal class Program
 		Logger logger = null;
 
 #if LOGGING_ENABLED
-		logger = new Logger();
-		using (logger)
+		using (logger = new Logger())
 #endif
 		{
 			try
@@ -98,9 +97,9 @@ internal class Program
 		if (compilerVersion == CompilerVersion.Version6Microsoft)
 		{
 			// Microsoft's compiler writes all warnings and errors to the standard output channel,
-			// so move them to the error channel
+			// so move them to the error channel skipping first 3 lines that are just part of the header.
 
-			while (OutputLines.Count > 4)
+			while (OutputLines.Count > 3)
 			{
 				var line = OutputLines[3];
 				OutputLines.RemoveAt(3);
@@ -138,13 +137,12 @@ internal class Program
 			logger?.Append($"{lineIndex++}: {line}");
 		}
 
-		logger?.Append("");
-
 		if (process.ExitCode != 0 || compilerVersion != CompilerVersion.Version6Microsoft)
 		{
 			return process.ExitCode;
 		}
 
+		logger?.Append("");
 		logger?.Append("- PDB to MDB conversion --------------------------------------");
 		logger?.Append("");
 
