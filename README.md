@@ -68,7 +68,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 	           }
             }
 
-* IL2CPP (affect iOS and WebGL):
+* IL2CPP (affects iOS and WebGL):
 
     * Currently fails to process exception filers *(ExceptionFiltersTest.cs)*.
     * Currently fails to process AsyncBridge library.
