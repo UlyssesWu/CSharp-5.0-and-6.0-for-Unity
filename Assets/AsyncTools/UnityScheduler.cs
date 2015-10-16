@@ -10,14 +10,9 @@ public class UnityScheduler : MonoBehaviour
 {
 	public static UnityScheduler Instance { get; private set; }
 	public static readonly UnityTaskScheduler MainThread = new UnityTaskScheduler();
+	public static int MainThreadId { get; private set; }
 
-	private readonly BlockingCollection<Task> mainThreadQueue = new BlockingCollection<Task>();
 	private UnitySynchronizationContext synchronizationContext;
-
-	public void EnqueueTask(Task task)
-	{
-		mainThreadQueue.Add(task);
-	}
 
 	private void Awake()
 	{
@@ -26,6 +21,7 @@ public class UnityScheduler : MonoBehaviour
 			throw new NotSupportedException("UnityScheduler already exists.");
 		}
 		Instance = this;
+		MainThreadId = Thread.CurrentThread.ManagedThreadId;
 
 		DontDestroyOnLoad(gameObject);
 		synchronizationContext = new UnitySynchronizationContext();
@@ -35,15 +31,16 @@ public class UnityScheduler : MonoBehaviour
 	private void Update()
 	{
 		Task task;
-		while (mainThreadQueue.TryTake(out task))
+		while (MainThread.mainThreadQueue.TryTake(out task))
 		{
-			MainThread.TryExecuteTask(task);
+			MainThread.ExecuteTask(task);
 		}
 
-		synchronizationContext.Run(); // execute continuations
+		synchronizationContext?.Run(); // execute continuations
 	}
 
 	#region Nested classes
+
 	private class UnitySynchronizationContext : SynchronizationContext
 	{
 		private readonly SyncronizationContextQueue queue = new SyncronizationContextQueue();
@@ -65,25 +62,37 @@ public class UnityScheduler : MonoBehaviour
 
 	public class UnityTaskScheduler : TaskScheduler
 	{
+		public readonly BlockingCollection<Task> mainThreadQueue = new BlockingCollection<Task>();
+
 		protected override IEnumerable<Task> GetScheduledTasks()
 		{
-			throw new NotImplementedException();
+			return mainThreadQueue;
 		}
 
 		protected override void QueueTask(Task task)
 		{
-			Instance.EnqueueTask(task);
+			mainThreadQueue.Add(task);
 		}
 
 		protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
 		{
-			return false;
+			if (Thread.CurrentThread.ManagedThreadId != MainThreadId)
+			{
+				return false;
+			}
+
+			return TryExecuteTask(task);
 		}
 
-		public new bool TryExecuteTask(Task task)
+		public void ExecuteTask(Task task)
 		{
-			return base.TryExecuteTask(task);
+			var result = TryExecuteTask(task);
+			if (result == false)
+			{
+				throw new InvalidOperationException();
+			}
 		}
 	}
+
 	#endregion
 }
