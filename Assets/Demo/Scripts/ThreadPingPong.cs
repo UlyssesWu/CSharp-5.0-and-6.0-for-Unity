@@ -15,13 +15,13 @@ internal class ThreadPingPong : MonoBehaviour
 		WhereAmI(); // main thread
 
 		var task1 = new Task(WhereAmI); // background thread
-		task1.Start(TaskScheduler.Default);
+		task1.Start(UnityScheduler.ThreadPoolScheduler);
 
 		var task2 = new Task(WhereAmI); // main thread
 		task2.Start(UnityScheduler.MainThreadScheduler);
 
 		var task3 = new Task(WhereAmI); // background thread
-		task3.Start(TaskScheduler.Default);
+		task3.Start(UnityScheduler.ThreadPoolScheduler);
 
 		// returns execution of asynchronous method to the main thread,
 		// if it was originally called from the main thread
@@ -51,6 +51,6 @@ internal class ThreadPingPong : MonoBehaviour
 		var continuationTask4 = continuationTask3.ContinueWith(
 			previousTask => WhereAmI()); // background thread
 
-		originalTask.Start(TaskScheduler.Default);
+		originalTask.Start(UnityScheduler.ThreadPoolScheduler);
 	}
 }
