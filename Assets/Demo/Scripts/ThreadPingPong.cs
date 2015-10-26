@@ -18,7 +18,7 @@ internal class ThreadPingPong : MonoBehaviour
 		task1.Start(TaskScheduler.Default);
 
 		var task2 = new Task(WhereAmI); // main thread
-		task2.Start(UnityScheduler.MainThread);
+		task2.Start(UnityScheduler.MainThreadScheduler);
 
 		var task3 = new Task(WhereAmI); // background thread
 		task3.Start(TaskScheduler.Default);
@@ -39,14 +39,14 @@ internal class ThreadPingPong : MonoBehaviour
 
 		var continuationTask1 = originalTask.ContinueWith(
 			previousTask => WhereAmI(),
-			UnityScheduler.MainThread); // main thread
+			UnityScheduler.MainThreadScheduler); // main thread
 
 		var continuationTask2 = continuationTask1.ContinueWith(
 			previousTask => WhereAmI()); // background thread
 
 		var continuationTask3 = continuationTask2.ContinueWith(
 			previousTask => WhereAmI(),
-			UnityScheduler.MainThread); // main thread
+			UnityScheduler.MainThreadScheduler); // main thread
 
 		var continuationTask4 = continuationTask3.ContinueWith(
 			previousTask => WhereAmI()); // background thread

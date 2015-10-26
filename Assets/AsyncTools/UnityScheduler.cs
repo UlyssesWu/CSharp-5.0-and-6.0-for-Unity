@@ -9,7 +9,9 @@ using SyncronizationContextQueue = System.Collections.Concurrent.BlockingCollect
 public class UnityScheduler : MonoBehaviour
 {
 	public static UnityScheduler Instance { get; private set; }
-	public static readonly UnityTaskScheduler MainThread = new UnityTaskScheduler();
+	[Obsolete("Use UnityScheduler.MainThreadScheduler instead.")]
+	public static UnityTaskScheduler MainThread => UnityTaskScheduler.GetInstance();
+	public static UnityTaskScheduler MainThreadScheduler => UnityTaskScheduler.GetInstance();
 	public static int MainThreadId { get; private set; }
 
 	private UnitySynchronizationContext synchronizationContext;
@@ -24,6 +26,7 @@ public class UnityScheduler : MonoBehaviour
 		MainThreadId = Thread.CurrentThread.ManagedThreadId;
 
 		DontDestroyOnLoad(gameObject);
+
 		synchronizationContext = new UnitySynchronizationContext();
 		SynchronizationContext.SetSynchronizationContext(synchronizationContext);
 	}
@@ -31,9 +34,9 @@ public class UnityScheduler : MonoBehaviour
 	private void Update()
 	{
 		Task task;
-		while (MainThread.mainThreadQueue.TryTake(out task))
+		while (MainThreadScheduler.mainThreadQueue.TryTake(out task))
 		{
-			MainThread.ExecuteTask(task);
+			MainThreadScheduler.ExecuteTask(task);
 		}
 
 		synchronizationContext?.Run(); // execute continuations
@@ -62,7 +65,14 @@ public class UnityScheduler : MonoBehaviour
 
 	public class UnityTaskScheduler : TaskScheduler
 	{
+		private static UnityTaskScheduler instance;
 		public readonly BlockingCollection<Task> mainThreadQueue = new BlockingCollection<Task>();
+
+		private UnityTaskScheduler()
+		{
+		}
+
+		internal static UnityTaskScheduler GetInstance() => instance ?? (instance = new UnityTaskScheduler());
 
 		protected override IEnumerable<Task> GetScheduledTasks()
 		{
