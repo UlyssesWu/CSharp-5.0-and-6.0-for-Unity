@@ -45,5 +45,55 @@ internal class ThreadPingPong : MonoBehaviour
 			previousTask => AsyncTools.WhereAmI("6")); // background thread
 
 		originalTask.Start(UnityScheduler.ThreadPoolScheduler);
+
+		await continuationTask4;
+		Debug.Log("done");
+	}
+
+	public void TaskRunSynchronouslyMainThreadDemo()
+	{
+		Debug.Log("Launched from the main thread...");
+		RunTasksSynchronously();
+		Debug.Log("done");
+	}
+
+	public async void TaskRunSynchronouslyBackgroundThreadDemo()
+	{
+		Debug.Log("Launched from a background thread...");
+		var task2 = new Task(RunTasksSynchronously);
+		task2.Start(UnityScheduler.ThreadPoolScheduler);
+		await task2;
+		Debug.Log("done");
+	}
+
+	private void RunTasksSynchronously()
+	{
+		/*
+		Fact #1: ThreadPoolScheduler supports running tasks on any thread.
+		Fact #2: MainThreadScheduler supports running tasks on the main thread only.
+
+		If this method is called from the main thread, all the tasks will be executed on the main thread.
+		
+		If this method is called from a background thread, the tasks associated with the thread pool scheduler
+		will be executed on the current background thread, and the tasks associated with the main thread pool will be
+		executed on the main thread and the current background thread will be blocked until the execution completes.
+		*/
+
+		AsyncTools.WhereAmI("1");
+
+		var task = new Task(() => AsyncTools.WhereAmI("2"));
+		task.RunSynchronously(UnityScheduler.MainThreadScheduler);
+
+		task = new Task(() => AsyncTools.WhereAmI("3"));
+		task.RunSynchronously(UnityScheduler.ThreadPoolScheduler);
+
+		task = new Task(() => AsyncTools.WhereAmI("4"));
+		task.RunSynchronously(UnityScheduler.MainThreadScheduler);
+
+		task = new Task(() => AsyncTools.WhereAmI("5"));
+		task.RunSynchronously(); // no scheduler => use default, which is ThreadPoolScheduler 
+
+		task = new Task(() => AsyncTools.WhereAmI("6"));
+		task.RunSynchronously(UnityScheduler.MainThreadScheduler);
 	}
 }
