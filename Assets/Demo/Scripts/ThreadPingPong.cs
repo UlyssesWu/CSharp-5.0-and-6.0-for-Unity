@@ -75,7 +75,7 @@ internal class ThreadPingPong : MonoBehaviour
 		If this method is called from the main thread, all the tasks will be executed on the main thread.
 		
 		If this method is called from a background thread, the tasks associated with the thread pool scheduler
-		will be executed on the current background thread, and the tasks associated with the main thread pool will be
+		will be executed on the current background thread, and the tasks associated with the main thread scheduler will be
 		executed on the main thread and the current background thread will be blocked until the execution completes.
 		*/
 
