@@ -3,10 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
+using Debug = UnityEngine.Debug;
 
 public static class AsyncTools
 {
+	public static void WhereAmI(string text)
+	{
+		var threadId = Thread.CurrentThread.ManagedThreadId;
+		Debug.Log(text + ": " + (threadId == UnityScheduler.MainThreadId ? "main thread" : "background thread #" + threadId));
+	}
+
 	public static Task<byte[]> DownloadAsBytesAsync(string address)
 	{
 		var task = new Task<byte[]>(
@@ -17,7 +25,7 @@ public static class AsyncTools
 					return webClient.DownloadData(address);
 				}
 			});
-		task.Start(TaskScheduler.Default);
+		task.Start(UnityScheduler.ThreadPoolScheduler);
 		return task;
 	}
 
@@ -31,7 +39,7 @@ public static class AsyncTools
 					return webClient.DownloadString(address);
 				}
 			});
-		task.Start(TaskScheduler.Default);
+		task.Start(UnityScheduler.ThreadPoolScheduler);
 		return task;
 	}
 
