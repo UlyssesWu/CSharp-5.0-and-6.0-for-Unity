@@ -1,55 +1,48 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 
 internal class ThreadPingPong : MonoBehaviour
 {
-	private void WhereAmI()
-	{
-		var threadId = Thread.CurrentThread.ManagedThreadId;
-		Debug.Log(threadId == 1 ? "main thread" : "background thread #" + threadId);
-	}
-
 	public async void AsyncAwaitDemo()
 	{
-		WhereAmI(); // main thread
+		AsyncTools.WhereAmI("1"); // main thread
 
-		var task1 = new Task(WhereAmI); // background thread
+		var task1 = new Task(() => AsyncTools.WhereAmI("2")); // background thread
 		task1.Start(UnityScheduler.ThreadPoolScheduler);
 
-		var task2 = new Task(WhereAmI); // main thread
+		var task2 = new Task(() => AsyncTools.WhereAmI("3")); // main thread
 		task2.Start(UnityScheduler.MainThreadScheduler);
 
-		var task3 = new Task(WhereAmI); // background thread
+		var task3 = new Task(() => AsyncTools.WhereAmI("4")); // background thread
 		task3.Start(UnityScheduler.ThreadPoolScheduler);
 
 		// returns execution of asynchronous method to the main thread,
 		// if it was originally called from the main thread
 		await TaskEx.WhenAll(task1, task2, task3);
 
-		WhereAmI(); // main thread
+		AsyncTools.WhereAmI("5"); // main thread
 		Debug.Log("done");
 	}
 
-	public void TaskContinueWithDemo()
+	public async void TaskContinueWithDemo()
 	{
-		WhereAmI(); // main thread
+		AsyncTools.WhereAmI("1"); // main thread
 
-		var originalTask = new Task(WhereAmI); // background thread
+		var originalTask = new Task(() => AsyncTools.WhereAmI("2")); // background thread
 
 		var continuationTask1 = originalTask.ContinueWith(
-			previousTask => WhereAmI(),
+			previousTask => AsyncTools.WhereAmI("3"),
 			UnityScheduler.MainThreadScheduler); // main thread
 
 		var continuationTask2 = continuationTask1.ContinueWith(
-			previousTask => WhereAmI()); // background thread
+			previousTask => AsyncTools.WhereAmI("4")); // background thread
 
 		var continuationTask3 = continuationTask2.ContinueWith(
-			previousTask => WhereAmI(),
+			previousTask => AsyncTools.WhereAmI("5"),
 			UnityScheduler.MainThreadScheduler); // main thread
 
 		var continuationTask4 = continuationTask3.ContinueWith(
-			previousTask => WhereAmI()); // background thread
+			previousTask => AsyncTools.WhereAmI("6")); // background thread
 
 		originalTask.Start(UnityScheduler.ThreadPoolScheduler);
 	}
