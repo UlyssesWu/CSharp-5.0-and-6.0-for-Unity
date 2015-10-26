@@ -1,7 +1,9 @@
 ﻿#define LOGGING_ENABLED
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -48,8 +50,8 @@ internal class Program
 		logger?.AppendHeader();
 
 		var compilationOptions = GetCompilationOptions(args);
-		var unityEditorDataDir = GetUnityEditorDataDir(compilationOptions);
-		var targetAssembly = compilationOptions.First(line => line.StartsWith("-out:")).Substring(10);
+		var unityEditorDataDir = GetUnityEditorDataDir();
+		var targetAssembly = compilationOptions.First(line => line.StartsWith("-out:")).Substring(10).Trim('\'');
 
 		logger?.Append($"smcs.exe version: {Assembly.GetExecutingAssembly().GetName().Version}");
 		logger?.Append($"Target assembly: {targetAssembly}");
@@ -57,7 +59,8 @@ internal class Program
 		logger?.Append($"Unity directory: {unityEditorDataDir}");
 
 		CompilerVersion compilerVersion;
-		if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Roslyn")))
+		// Roslyn compiler currently works with windows only.
+		if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Roslyn")) && IsWindows())
 		{
 			compilerVersion = CompilerVersion.Version6Microsoft;
 		}
@@ -153,16 +156,14 @@ internal class Program
 		var libraryPath = Path.Combine("Temp", targetAssembly);
 		var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(targetAssembly) + ".pdb");
 
+		var startInfo = OSDependentStartInfo(ProcessType.OS_NET_RUNTIME, pdb2mdbPath, libraryPath, unityEditorDataDir);
+		startInfo.UseShellExecute = false;
+		startInfo.RedirectStandardOutput = true;
+		startInfo.CreateNoWindow = true;
+
 		process = new Process
 		{
-			StartInfo =
-					  {
-						  FileName = pdb2mdbPath,
-						  Arguments = libraryPath,
-						  UseShellExecute = false,
-						  RedirectStandardOutput = true,
-						  CreateNoWindow = true,
-					  }
+			StartInfo = startInfo
 		};
 
 		process.OutputDataReceived += Process_OutputDataReceived;
@@ -211,12 +212,14 @@ internal class Program
 		var systemCoreDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Core.dll");
 		var systemXmlDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Xml.dll");
 
+		var processType = ProcessType.OS_NET_RUNTIME;
+
 		switch (version)
 		{
 			case CompilerVersion.Version3:
-				processPath = Path.Combine(unityEditorDataDir, @"Mono/bin/mono.exe");
-				var compilerPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/gmcs.exe");
-				processArguments = $"\"{compilerPath}\" {responseFile}";
+				processType = ProcessType.UNITY_MONO;
+				processPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/gmcs.exe");
+				processArguments = responseFile;
 				break;
 
 			case CompilerVersion.Version5:
@@ -227,6 +230,9 @@ internal class Program
 			case CompilerVersion.Version6Mono:
 				processPath = Path.Combine(Directory.GetCurrentDirectory(), "mcs.exe");
 				processArguments = $"-sdk:2 -r:\"{systemCoreDllPath}\" {responseFile}";
+				if (!IsWindows()) {
+					processArguments = $"-sdk:2 {responseFile}";
+				}
 				break;
 
 			case CompilerVersion.Version6Microsoft:
@@ -234,22 +240,30 @@ internal class Program
 				var mscorlib = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
 				processArguments =
 					$"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemDllPath}\" -r:\"{systemCoreDllPath}\" -r:\"{systemXmlDllPath}\" {responseFile}";
+				if (!IsWindows()) {
+					// Temp file is different in mac build for some reason
+					var fileName = responseFile.Substring(1);
+					var data = File.ReadAllText(fileName);
+					data = data.Replace('\'', '\"');
+					// Debug build does not work with this compiler on a mac
+					// Unity does not work without debug build
+//					data = data.Replace("-debug", "");
+					File.WriteAllText(fileName, data);
+				}
 				break;
 
 			default:
 				throw new ArgumentOutOfRangeException(nameof(version), version, null);
 		}
 
+		var startInfo = OSDependentStartInfo(processType, processPath, processArguments, unityEditorDataDir);
+		startInfo.RedirectStandardError = true;
+		startInfo.RedirectStandardOutput = true;
+		startInfo.UseShellExecute = false;
+
 		var process = new Process
 		{
-			StartInfo =
-						  {
-							  FileName = processPath,
-							  Arguments = processArguments,
-							  RedirectStandardError = true,
-							  RedirectStandardOutput = true,
-							  UseShellExecute = false
-						  }
+			StartInfo = startInfo
 		};
 
 		process.OutputDataReceived += Process_OutputDataReceived;
@@ -258,16 +272,52 @@ internal class Program
 		return process;
 	}
 
-	private static string GetUnityEditorDataDir(string[] compilationOptions)
-	{
-		var filename = compilationOptions.First(line => line.Contains("UnityEngine.dll")).Substring(3).Trim('\"');
-		var index = filename.IndexOf("Data");
-		filename = filename.Substring(0, index + "Data".Length);
-		return filename;
+	enum ProcessType { OS_NET_RUNTIME, UNITY_MONO }
+
+	static ProcessStartInfo OSDependentStartInfo(ProcessType processType, string processPath, string processArguments, string unityEditorDataDir) {
+		var customRuntime = "";
+		if (!IsWindows() && processType == ProcessType.OS_NET_RUNTIME) {
+			customRuntime = "/usr/bin/mono";
+		}
+		if (processType == ProcessType.UNITY_MONO) {
+			customRuntime = Path.Combine(unityEditorDataDir, @"Mono/bin/mono");
+			if (IsWindows()) {
+				customRuntime += ".exe";
+			}
+		}
+		if (!string.IsNullOrEmpty(customRuntime)) {
+			processArguments = $"\"{processPath}\" {processArguments}";
+			processPath = customRuntime;
+		}
+		var startInfo = new ProcessStartInfo(processPath, processArguments);
+		if (!IsWindows() && processType == ProcessType.OS_NET_RUNTIME) {
+			var vars = startInfo.EnvironmentVariables;
+			vars.Remove("MONO_PATH");
+			vars.Remove("MONO_CFG_DIR");
+		}
+		return startInfo;
 	}
 
-	private static string[] GetCompilationOptions(string[] args)
-	{
+	static bool IsWindows() {
+		switch (Environment.OSVersion.Platform) {
+			case PlatformID.Win32NT:
+			case PlatformID.Win32S:
+			case PlatformID.Win32Windows:
+			case PlatformID.WinCE:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	static string GetUnityEditorDataDir() {
+    var asseblyLocation = typeof(Program).Assembly.Location;
+    return Path.GetFullPath(Path.Combine(
+      Path.GetDirectoryName(asseblyLocation), @"../../../.."
+    ));
+	}
+
+	static string[] GetCompilationOptions(string[] args) {
 		var compilationOptions = File.ReadAllLines(args[0].TrimStart('@'));
 		return compilationOptions;
 	}
