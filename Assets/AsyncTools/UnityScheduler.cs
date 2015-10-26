@@ -12,6 +12,7 @@ public class UnityScheduler : MonoBehaviour
 	[Obsolete("Use UnityScheduler.MainThreadScheduler instead.")]
 	public static UnityTaskScheduler MainThread => UnityTaskScheduler.GetInstance();
 	public static UnityTaskScheduler MainThreadScheduler => UnityTaskScheduler.GetInstance();
+	public static TaskScheduler ThreadPoolScheduler => TaskScheduler.Default;
 	public static int MainThreadId { get; private set; }
 
 	private UnitySynchronizationContext synchronizationContext;
