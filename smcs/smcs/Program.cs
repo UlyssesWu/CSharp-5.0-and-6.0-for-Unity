@@ -1,9 +1,7 @@
 ﻿#define LOGGING_ENABLED
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,10 +11,23 @@ internal class Program
 {
 	private enum CompilerVersion
 	{
-		Version3,
-		Version5,
+		Version3Mono,
+		Version5Mono,
 		Version6Microsoft,
-		Version6Mono
+		Version6Mono,
+	}
+
+	private enum Platform
+	{
+		Windows,
+		Linux,
+		Mac,
+	}
+
+	private enum ProcessRuntime
+	{
+		CLR40,
+		CLR20,
 	}
 
 	private static readonly List<string> OutputLines = new List<string>();
@@ -54,13 +65,28 @@ internal class Program
 		var targetAssembly = compilationOptions.First(line => line.StartsWith("-out:")).Substring(10).Trim('\'');
 
 		logger?.Append($"smcs.exe version: {Assembly.GetExecutingAssembly().GetName().Version}");
+		logger?.Append($"Platform: {CurrentPlatform}");
 		logger?.Append($"Target assembly: {targetAssembly}");
 		logger?.Append($"Project directory: {Directory.GetCurrentDirectory()}");
 		logger?.Append($"Unity directory: {unityEditorDataDir}");
 
+		if (CurrentPlatform != Platform.Windows && CurrentPlatform != Platform.Mac)
+		{
+			logger?.Append("");
+			logger?.Append("Platform is not supported");
+			return -1;
+		}
+
 		CompilerVersion compilerVersion;
+		var roslynExists = Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Roslyn"));
+
 		// Roslyn compiler currently works with windows only.
-		if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Roslyn")) && IsWindows())
+		if (roslynExists && CurrentPlatform != Platform.Windows)
+		{
+			logger?.Append("Microsoft C# 6.0 compiler is not supported on the current platform. Looking for another compiler...");
+		}
+
+		if (roslynExists && CurrentPlatform == Platform.Windows)
 		{
 			compilerVersion = CompilerVersion.Version6Microsoft;
 		}
@@ -70,11 +96,11 @@ internal class Program
 		}
 		else if (compilationOptions.Any(line => line.Contains("AsyncBridge.Net35.dll")))
 		{
-			compilerVersion = CompilerVersion.Version5;
+			compilerVersion = CompilerVersion.Version5Mono;
 		}
 		else
 		{
-			compilerVersion = CompilerVersion.Version3;
+			compilerVersion = CompilerVersion.Version3Mono;
 		}
 
 		logger?.Append($"Compiler: {compilerVersion}");
@@ -156,15 +182,15 @@ internal class Program
 		var libraryPath = Path.Combine("Temp", targetAssembly);
 		var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(targetAssembly) + ".pdb");
 
-		var startInfo = OSDependentStartInfo(ProcessType.OS_NET_RUNTIME, pdb2mdbPath, libraryPath, unityEditorDataDir);
+		var startInfo = OSDependentStartInfo(ProcessRuntime.CLR40, pdb2mdbPath, libraryPath, unityEditorDataDir);
 		startInfo.UseShellExecute = false;
 		startInfo.RedirectStandardOutput = true;
 		startInfo.CreateNoWindow = true;
 
 		process = new Process
-		{
-			StartInfo = startInfo
-		};
+				  {
+					  StartInfo = startInfo
+				  };
 
 		process.OutputDataReceived += Process_OutputDataReceived;
 
@@ -212,42 +238,56 @@ internal class Program
 		var systemCoreDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Core.dll");
 		var systemXmlDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Xml.dll");
 
-		var processType = ProcessType.OS_NET_RUNTIME;
-
+		ProcessRuntime processRuntime;
 		switch (version)
 		{
-			case CompilerVersion.Version3:
-				processType = ProcessType.UNITY_MONO;
+			case CompilerVersion.Version3Mono:
+				processRuntime = ProcessRuntime.CLR20;
 				processPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/gmcs.exe");
 				processArguments = responseFile;
 				break;
 
-			case CompilerVersion.Version5:
+			case CompilerVersion.Version5Mono:
+				processRuntime = ProcessRuntime.CLR40;
 				processPath = Path.Combine(unityEditorDataDir, @"MonoBleedingEdge/lib/mono/4.5/mcs.exe");
-				processArguments = $"-sdk:2 -langversion:Future -r:\"{systemCoreDllPath}\" {responseFile}";
+				if (CurrentPlatform == Platform.Windows)
+				{
+					processArguments = $"-sdk:2 -langversion:Future -r:\"{systemCoreDllPath}\" {responseFile}";
+				}
+				else
+				{
+					processArguments = $"-sdk:2 -langversion:Future {responseFile}";
+				}
 				break;
 
 			case CompilerVersion.Version6Mono:
+				processRuntime = ProcessRuntime.CLR40;
 				processPath = Path.Combine(Directory.GetCurrentDirectory(), "mcs.exe");
-				processArguments = $"-sdk:2 -r:\"{systemCoreDllPath}\" {responseFile}";
-				if (!IsWindows()) {
+				if (CurrentPlatform == Platform.Windows)
+				{
+					processArguments = $"-sdk:2 -r:\"{systemCoreDllPath}\" {responseFile}";
+				}
+				else
+				{
 					processArguments = $"-sdk:2 {responseFile}";
 				}
 				break;
 
 			case CompilerVersion.Version6Microsoft:
+				processRuntime = ProcessRuntime.CLR40;
 				processPath = Path.Combine(Directory.GetCurrentDirectory(), @"Roslyn/csc.exe");
 				var mscorlib = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
-				processArguments =
-					$"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemDllPath}\" -r:\"{systemCoreDllPath}\" -r:\"{systemXmlDllPath}\" {responseFile}";
-				if (!IsWindows()) {
+				processArguments = $"-nostdlib+ -noconfig -r:\"{mscorlib}\" -r:\"{systemDllPath}\" -r:\"{systemCoreDllPath}\" -r:\"{systemXmlDllPath}\" {responseFile}";
+
+				if (CurrentPlatform == Platform.Mac) // Always false since Roslyn is not supported on Mac
+				{
 					// Temp file is different in mac build for some reason
 					var fileName = responseFile.Substring(1);
 					var data = File.ReadAllText(fileName);
 					data = data.Replace('\'', '\"');
 					// Debug build does not work with this compiler on a mac
 					// Unity does not work without debug build
-//					data = data.Replace("-debug", "");
+					//					data = data.Replace("-debug", "");
 					File.WriteAllText(fileName, data);
 				}
 				break;
@@ -256,15 +296,15 @@ internal class Program
 				throw new ArgumentOutOfRangeException(nameof(version), version, null);
 		}
 
-		var startInfo = OSDependentStartInfo(processType, processPath, processArguments, unityEditorDataDir);
+		var startInfo = OSDependentStartInfo(processRuntime, processPath, processArguments, unityEditorDataDir);
 		startInfo.RedirectStandardError = true;
 		startInfo.RedirectStandardOutput = true;
 		startInfo.UseShellExecute = false;
 
 		var process = new Process
-		{
-			StartInfo = startInfo
-		};
+					  {
+						  StartInfo = startInfo
+					  };
 
 		process.OutputDataReceived += Process_OutputDataReceived;
 		process.ErrorDataReceived += Process_ErrorDataReceived;
@@ -272,52 +312,81 @@ internal class Program
 		return process;
 	}
 
-	enum ProcessType { OS_NET_RUNTIME, UNITY_MONO }
+	private static ProcessStartInfo OSDependentStartInfo(ProcessRuntime processRuntime, string processPath, string processArguments, string unityEditorDataDir)
+	{
+		ProcessStartInfo startInfo;
 
-	static ProcessStartInfo OSDependentStartInfo(ProcessType processType, string processPath, string processArguments, string unityEditorDataDir) {
-		var customRuntime = "";
-		if (!IsWindows() && processType == ProcessType.OS_NET_RUNTIME) {
-			customRuntime = "/usr/bin/mono";
+		if (CurrentPlatform == Platform.Windows)
+		{
+			startInfo = new ProcessStartInfo(processPath, processArguments);
 		}
-		if (processType == ProcessType.UNITY_MONO) {
-			customRuntime = Path.Combine(unityEditorDataDir, @"Mono/bin/mono");
-			if (IsWindows()) {
-				customRuntime += ".exe";
+		else
+		{
+			string runtimePath;
+			switch (processRuntime)
+			{
+				case ProcessRuntime.CLR40:
+					runtimePath = Path.Combine(unityEditorDataDir, @"MonoBleedingEdge/bin/mono");
+					break;
+
+				case ProcessRuntime.CLR20:
+					runtimePath = Path.Combine(unityEditorDataDir, @"Mono/bin/mono");
+					break;
+
+				default:
+					throw new ArgumentOutOfRangeException(nameof(processRuntime), processRuntime, null);
+			}
+
+			startInfo = new ProcessStartInfo(runtimePath, $"\"{processPath}\" {processArguments}");
+
+			if (processRuntime != ProcessRuntime.CLR20)
+			{
+				// Since we already are running under old mono runtime, we need to remove
+				// these variables before launching the different version of the runtime.
+				var vars = startInfo.EnvironmentVariables;
+				vars.Remove("MONO_PATH");
+				vars.Remove("MONO_CFG_DIR");
 			}
 		}
-		if (!string.IsNullOrEmpty(customRuntime)) {
-			processArguments = $"\"{processPath}\" {processArguments}";
-			processPath = customRuntime;
-		}
-		var startInfo = new ProcessStartInfo(processPath, processArguments);
-		if (!IsWindows() && processType == ProcessType.OS_NET_RUNTIME) {
-			var vars = startInfo.EnvironmentVariables;
-			vars.Remove("MONO_PATH");
-			vars.Remove("MONO_CFG_DIR");
-		}
+
 		return startInfo;
 	}
 
-	static bool IsWindows() {
-		switch (Environment.OSVersion.Platform) {
-			case PlatformID.Win32NT:
-			case PlatformID.Win32S:
-			case PlatformID.Win32Windows:
-			case PlatformID.WinCE:
-				return true;
-			default:
-				return false;
+	private static Platform CurrentPlatform
+	{
+		get
+		{
+			switch (Environment.OSVersion.Platform)
+			{
+				case PlatformID.Unix:
+					// Well, there are chances MacOSX is reported as Unix instead of MacOSX.
+					// Instead of platform check, we'll do a feature checks (Mac specific root folders)
+					if (Directory.Exists("/Applications")
+						& Directory.Exists("/System")
+						& Directory.Exists("/Users")
+						& Directory.Exists("/Volumes"))
+					{
+						return Platform.Mac;
+					}
+					return Platform.Linux;
+
+				case PlatformID.MacOSX:
+					return Platform.Mac;
+
+				default:
+					return Platform.Windows;
+			}
 		}
 	}
 
-	static string GetUnityEditorDataDir() {
-    var asseblyLocation = typeof(Program).Assembly.Location;
-    return Path.GetFullPath(Path.Combine(
-      Path.GetDirectoryName(asseblyLocation), @"../../../.."
-    ));
+	private static string GetUnityEditorDataDir()
+	{
+		var asseblyLocation = Assembly.GetExecutingAssembly().Location;
+		return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(asseblyLocation), @"../../../.."));
 	}
 
-	static string[] GetCompilationOptions(string[] args) {
+	private static string[] GetCompilationOptions(string[] args)
+	{
 		var compilationOptions = File.ReadAllLines(args[0].TrimStart('@'));
 		return compilationOptions;
 	}
