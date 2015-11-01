@@ -8,7 +8,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 # Ok, what should I do ? #
 
-1. Copy `smcs\smcs\bin\Release\smcs.exe` from this repository to your `\Unity\Editor\Data\Mono\lib\mono\2.0` folder. Just copy, there's nothing to replace.
+1. Copy `smcs/smcs/bin/Release/smcs.exe` from this repository to your `/Unity/Editor/Data/Mono/lib/mono/2.0` folder on Windows or `/Applications/Unity/Unity.app/Contents/Frameworks/Mono/lib/mono/2.0` on Mac OS X. Just copy, there's nothing to replace.
 
 2. Create a new Unity project or open an existing one. Make sure that `Project Settings`/`Player`/`API Compatibility Level` is set to `.Net 2.0`.
 
@@ -20,13 +20,13 @@ That's it.
 
 smcs.exe receives and redirects compilation requests from Unity to one of the available C# compilers using the following rules:
 
-1. If the current project contains `Roslyn` folder, then Roslyn C# 6.0 compiler will be used;
+1. If the current project contains `Roslyn` folder and the platform is Windows, then Roslyn C# 6.0 compiler will be used;
 
 2. else if the current project contains `mcs.exe`, then this Mono C# 6.0 compiler will be used;
 
-3. else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be used (\Unity\Editor\Data\MonoBleedingEdge\lib\mono\4.5\mcs.exe);
+3. else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be used (/Unity/Editor/Data/MonoBleedingEdge/lib/mono/4.5/mcs.exe);
 
-4. else the stock compiler will be used (\Unity\Editor\Data\Mono\lib\mono\2.0\gmcs.exe).
+4. else the stock compiler will be used (/Unity/Editor/Data/Mono/lib/mono/2.0/gmcs.exe).
 
 It means that Unity will use the alternative compiler only in those projects, where you have explicitely expressed your wish to do so. Otherwise, it will use the stock compiler as usual, and the only bad thing that can happen is if `smcs.exe` crashes for whatever reason instead of doing its job. Then you can just delete it and continue as if nothing ever happened.
 
@@ -73,7 +73,9 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
     * Currently fails to process exception filters *(ExceptionFiltersTest.cs)*.
     * Currently fails to process AsyncBridge library.
 
-* Async/await is not stable on Android. Results may vary - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2188292               
+* Async/await is not stable on Android. Results may vary - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2188292
+
+* Task Parallel Library (System.Threading.dll) is partially functional on Mac.       
 
 # Random notes #
 
