@@ -18,7 +18,7 @@ Old way:
 
 New way (no need to modify Unity installation folder after each Unity update):
 
-1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to your project.
+1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to any `Editor` folder inside your project.
 
 2. Copy `smcs.exe` to your project's root.
 
@@ -84,11 +84,6 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 * IL2CPP (affects iOS and WebGL):
 
     * Currently fails to process exception filters *(ExceptionFiltersTest.cs)*.
-    * Currently fails to process AsyncBridge library.
-
-* Async/await is not stable on Android. Results may vary - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2188292
-
-* Task Parallel Library (System.Threading.dll) is partially functional on Mac.       
 
 # Random notes #
 
