@@ -8,17 +8,30 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 # Ok, what should I do ? #
 
-1. Copy `smcs/smcs/bin/Release/smcs.exe` from this repository to your `/Unity/Editor/Data/Mono/lib/mono/2.0` folder on Windows or `/Applications/Unity/Unity.app/Contents/Frameworks/Mono/lib/mono/2.0` on Mac OS X. Just copy, there's nothing to replace.
+Old way:
+
+1. Copy `smcs.exe` from this repository to your `/Unity/Editor/Data/Mono/lib/mono/2.0` folder on Windows or `/Applications/Unity/Unity.app/Contents/Frameworks/Mono/lib/mono/2.0` on Mac OS X. Just copy, there's nothing to replace.
 
 2. Create a new Unity project or open an existing one. Make sure that `Project Settings`/`Player`/`API Compatibility Level` is set to `.Net 2.0`.
 
 3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
 
+New way (no need to modify Unity installation folder after each Unity update):
+
+1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to your project.
+
+2. Copy `smcs.exe` to your project's root.
+
+3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
+
+
 That's it.
 
 # How does it work? #
 
-smcs.exe receives and redirects compilation requests from Unity to one of the available C# compilers using the following rules:
+`Assets/Editor/CSharp60Support.dll`, if exists, modifies Unity editor's internal data, telling it to use a custom C# compiler (`smcs.exe`) that should be located in the current project's root folder. If there's no `smcs.exe` in the project's root, then a stock compiler will be used.
+
+`smcs.exe` receives and redirects compilation requests from Unity to one of the actual C# compilers using the following rules:
 
 1. If the current project contains `Roslyn` folder and the platform is Windows, then Roslyn C# 6.0 compiler will be used;
 
@@ -28,7 +41,7 @@ smcs.exe receives and redirects compilation requests from Unity to one of the av
 
 4. else the stock compiler will be used (/Unity/Editor/Data/Mono/lib/mono/2.0/gmcs.exe).
 
-It means that Unity will use the alternative compiler only in those projects, where you have explicitely expressed your wish to do so. Otherwise, it will use the stock compiler as usual, and the only bad thing that can happen is if `smcs.exe` crashes for whatever reason instead of doing its job. Then you can just delete it and continue as if nothing ever happened.
+All it means that Unity will use the alternative compiler only in those projects, where you have explicitely expressed your wish to do so. Otherwise, it will use the stock compiler as usual.
 
 # License #
 

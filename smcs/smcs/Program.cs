@@ -188,9 +188,9 @@ internal class Program
 		startInfo.CreateNoWindow = true;
 
 		process = new Process
-				  {
-					  StartInfo = startInfo
-				  };
+		{
+			StartInfo = startInfo
+		};
 
 		process.OutputDataReceived += Process_OutputDataReceived;
 
@@ -302,9 +302,9 @@ internal class Program
 		startInfo.UseShellExecute = false;
 
 		var process = new Process
-					  {
-						  StartInfo = startInfo
-					  };
+		{
+			StartInfo = startInfo
+		};
 
 		process.OutputDataReceived += Process_OutputDataReceived;
 		process.ErrorDataReceived += Process_ErrorDataReceived;
@@ -379,10 +379,21 @@ internal class Program
 		}
 	}
 
+	/// <summary>
+	/// Returns the directory that contains Mono and MonoBleedingEdge directories
+	/// </summary>
 	private static string GetUnityEditorDataDir()
 	{
-		var asseblyLocation = Assembly.GetExecutingAssembly().Location;
-		return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(asseblyLocation), @"../../../.."));
+		// Windows:
+		// MONO_PATH: C:\Program Files\Unity\Editor\Data\Mono\lib\mono\2.0
+		//
+		// Mac OS X:
+		// MONO_PATH: /Applications/Unity/Unity.app/Contents/Frameworks/Mono/lib/mono/2.0
+
+		var monoPath = Environment.GetEnvironmentVariable("MONO_PATH").Replace("\\", "/");
+        var index = monoPath.IndexOf("/Mono/lib/", StringComparison.InvariantCultureIgnoreCase);
+		var path = monoPath.Substring(0, index);
+		return path;
 	}
 
 	private static string[] GetCompilationOptions(string[] args)
