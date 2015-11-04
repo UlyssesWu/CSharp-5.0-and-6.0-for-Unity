@@ -16,7 +16,7 @@ Old way:
 
 3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
 
-New way (no need to modify Unity installation folder after each Unity update):
+New way:
 
 1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to any `Editor` folder inside your project.
 
@@ -24,8 +24,9 @@ New way (no need to modify Unity installation folder after each Unity update):
 
 3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
 
-
 That's it.
+
+The new way has one huge advantage: there's no need to modify Unity installation folder each time Unity updates.
 
 # How does it work? #
 
@@ -41,7 +42,7 @@ That's it.
 
 4. else the stock compiler will be used (/Unity/Editor/Data/Mono/lib/mono/2.0/gmcs.exe).
 
-All it means that Unity will use the alternative compiler only in those projects, where you have explicitely expressed your wish to do so. Otherwise, it will use the stock compiler as usual.
+All this means that Unity will use the alternative compiler only in those projects, where you have explicitely expressed your wish to do so. Otherwise, it will use the stock compiler as usual.
 
 # License #
 
