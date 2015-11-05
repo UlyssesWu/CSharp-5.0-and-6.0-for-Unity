@@ -8,7 +8,11 @@ internal class Logger : MonoBehaviour
 	private void Awake()
 	{
 		textControl = GetComponent<Text>();
+#if UNITY_5
 		Application.logMessageReceivedThreaded += Application_logMessageReceived;
+#else
+		Application.RegisterLogCallback(Application_logMessageReceived);
+#endif
 
 		Debug.Log("Current platform: " + Application.platform);
 	}

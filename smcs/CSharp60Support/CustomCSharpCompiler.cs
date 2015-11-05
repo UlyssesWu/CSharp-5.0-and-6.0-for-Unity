@@ -9,9 +9,15 @@ using UnityEngine;
 
 internal class CustomCSharpCompiler : MonoCSharpCompiler
 {
+#if UNITY4
+	public CustomCSharpCompiler(MonoIsland island, bool runUpdater) : base(island)
+	{
+	}
+#else
 	public CustomCSharpCompiler(MonoIsland island, bool runUpdater) : base(island, runUpdater)
 	{
 	}
+#endif
 
 	private string GetCompilerPath(List<string> arguments)
 	{
