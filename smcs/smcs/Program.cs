@@ -326,7 +326,14 @@ internal class Program
 			switch (processRuntime)
 			{
 				case ProcessRuntime.CLR40:
-					runtimePath = Path.Combine(unityEditorDataDir, @"MonoBleedingEdge/bin/mono");
+					if (File.Exists("/usr/local/bin/mono"))
+					{
+						runtimePath = "/usr/local/bin/mono";
+					}
+					else
+					{
+						runtimePath = Path.Combine(unityEditorDataDir, "MonoBleedingEdge/bin/mono");
+					}
 					break;
 
 				case ProcessRuntime.CLR20:
