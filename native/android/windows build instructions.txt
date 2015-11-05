@@ -1,0 +1,10 @@
+first, you need to download the android ndk
+
+https://developer.android.com/ndk/downloads/index.html
+
+
+copy the contents of the folder that is extracted to 
+C:\android-ndk
+as this is where the build.bat file is expecting it to be
+
+Then just run build.bat, and the libkernel32.so should be built somewhere inside the libs folder that will be created next to this file

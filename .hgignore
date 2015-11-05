@@ -10,3 +10,5 @@ Temp/
 bin/
 obj/
 compilation log.txt
+native/android/libs/
+native/android/obj/
