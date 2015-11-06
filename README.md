@@ -16,6 +16,8 @@ Old way:
 
 3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
 
+4. If you run Unity 4 on Mac OS X, download and install [Mono][mono]. 
+
 New way:
 
 1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to any `Editor` folder inside your project.
@@ -23,6 +25,8 @@ New way:
 2. Copy `smcs.exe` to your project's root.
 
 3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
+
+4. If you run Unity 4 on Mac OS X, download and install [Mono][mono].  
 
 That's it.
 
@@ -98,7 +102,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [one][synccontext1], [two][synccontext2], [three][synccontext3].
 
-[mono]: http://www.mono-project.com/download/#download-win
+[mono]: http://www.mono-project.com/download/
 [roslyn]: https://github.com/dotnet/roslyn
 [asyncbridge]: https://www.simple-talk.com/blogs/2012/04/18/asyncbridge-write-async-code-for-net-3-5/
 [synccontext1]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx
