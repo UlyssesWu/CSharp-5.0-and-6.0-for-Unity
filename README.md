@@ -20,7 +20,7 @@ Old way:
 
 New way:
 
-1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to any `Editor` folder inside your project.
+1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to any `Editor` folder inside your project (if you use Unity 4, take the one from `Assets/Editor/CSharp60Support for Unity 4.zip`).
 
 2. Copy `smcs.exe` to your project's root.
 
