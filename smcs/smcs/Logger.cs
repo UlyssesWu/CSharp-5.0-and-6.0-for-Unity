@@ -5,7 +5,7 @@ using System.Threading;
 
 internal class Logger : IDisposable
 {
-	private enum LogginStyle
+	private enum LoggingMethod
 	{
 		Immediate,
 		Retained,
@@ -15,8 +15,8 @@ internal class Logger : IDisposable
 	private const int MAXIMUM_FILE_AGE_IN_MINUTES = 5;
 
 	private readonly Mutex mutex;
-	private readonly LogginStyle logginStyle;
-	private readonly StringBuilder pendingLines = new StringBuilder();
+	private readonly LoggingMethod loggingMethod;
+	private readonly StringBuilder pendingLines;
 
 	public Logger()
 	{
@@ -24,12 +24,13 @@ internal class Logger : IDisposable
 
 		if (mutex.WaitOne(0)) // check if no other process is owning the mutex
 		{
-			logginStyle = LogginStyle.Immediate;
+			loggingMethod = LoggingMethod.Immediate;
 			DeleteLogFileIfTooOld();
 		}
 		else
 		{
-			logginStyle = LogginStyle.Retained;
+			pendingLines = new StringBuilder();
+			loggingMethod = LoggingMethod.Retained;
 		}
 	}
 
@@ -37,7 +38,7 @@ internal class Logger : IDisposable
 	{
 		mutex.WaitOne(); // make sure we own the mutex now, so no other process is writing to the file
 
-		if (logginStyle == LogginStyle.Retained)
+		if (loggingMethod == LoggingMethod.Retained)
 		{
 			DeleteLogFileIfTooOld();
 			File.AppendAllText(LOG_FILENAME, pendingLines.ToString());
@@ -69,7 +70,7 @@ internal class Logger : IDisposable
 
 	public void Append(string message)
 	{
-		if (logginStyle == LogginStyle.Immediate)
+		if (loggingMethod == LoggingMethod.Immediate)
 		{
 			File.AppendAllText(LOG_FILENAME, message + Environment.NewLine);
 		}
