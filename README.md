@@ -6,7 +6,7 @@ Unity has been stuck with CLR 2.0 for a very long time, but almost all the lates
 
 Late binding (`dynamic`) feature that came with C# 4.0 still won't be available in Unity, because it relies on CLR 4.0 that we don't have yet.
 
-# Ok, what should I do ? #
+# Ok, what should I do? #
 
 Old way:
 
@@ -60,7 +60,13 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * C# 5.0/6.0 is incompatible with Unity Cloud Build service for obvious reason.
 
+* WebPlayer platform is not supported.
+
 * Using Mono C# 6.0 compiler may cause Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
+
+* IL2CPP (affects iOS and WebGL):
+
+    * Currently fails to process exception filters *(ExceptionFiltersTest.cs)*.
 
 * There are cases when Mono compiler fails to compile fully legit C# 6.0 code:
 
@@ -87,10 +93,6 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 		          Abc = new Abc(); // error CS0118: `Abc' is a `type' but a `variable' was expected
 	           }
             }
-
-* IL2CPP (affects iOS and WebGL):
-
-    * Currently fails to process exception filters *(ExceptionFiltersTest.cs)*.
 
 # Random notes #
 
