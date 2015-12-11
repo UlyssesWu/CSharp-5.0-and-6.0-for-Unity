@@ -58,6 +58,8 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 # Known issues #
 
+* C# 5.0/6.0 is incompatible with Unity Cloud Build service for obvious reason.
+
 * Using Mono C# 6.0 compiler may cause Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
 
 * There are cases when Mono compiler fails to compile fully legit C# 6.0 code:
