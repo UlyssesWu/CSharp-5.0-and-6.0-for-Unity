@@ -9,6 +9,18 @@ internal class Logger : IDisposable
 	{
 		Immediate,
 		Retained,
+
+		/*
+		- Immediate
+		Every message will be written to the log file right away in real time.
+		
+		- Retained
+		All the messages will be retained in a temporary storage and flushed to disk
+		only when the Logger object is disposed. This solves the log file sharing problem
+		when Unity launched two compilation processes simultaneously, that can happen and
+		happens in case of Assembly-CSharp.dll and Assembly-CSharp-Editor-firstpass.dll
+		as they do not reference one another.
+		*/
 	}
 
 	private const string LOG_FILENAME = "compilation log.txt";
