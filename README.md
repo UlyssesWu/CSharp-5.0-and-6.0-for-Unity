@@ -58,15 +58,15 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 # Known issues #
 
-* C# 5.0/6.0 is incompatible with Unity Cloud Build service for obvious reason.
+* C# 5.0/6.0 is not compatible with Unity Cloud Build service for obvious reason.
 
 * WebPlayer platform is not supported.
 
+* AsyncBrigde stuff is not compatible with Windows Store Application platform due to API differences between the recent versions of .Net Framework and the ancient version of System.Threading.dll that comes with AsyncBridge. Namely, you can't use async/await, caller information attributes and everything from System.Threading.dll (concurrent collections for example).
+
 * Using Mono C# 6.0 compiler may cause Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
 
-* IL2CPP (affects iOS and WebGL):
-
-    * Currently fails to process exception filters *(ExceptionFiltersTest.cs)*.
+* IL2CPP (affects iOS and WebGL) currently fails to process exception filters (ExceptionFiltersTest.cs)
 
 * There are cases when Mono compiler fails to compile fully legit C# 6.0 code:
 
@@ -102,7 +102,9 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * AsyncBridge library provides a set of types that makes it possible to use _async/await_ in projects that target CLR 2.0. For more information, check [this blog post][asyncbridge].
 
-* If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you would want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context. Check `UnityScheduler.cs` example located inside the project.
+* If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you would want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context, like all WinForms and WPF applications do.
+
+    Check `UnityScheduler.cs` example located inside the project or just put `UnityScheduler` prefab in your first scene. The scripts creates and registers a synchronization context for the Unity's main thread, so async/await could work the way they do in regular WinForms or WPF applications.
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [one][synccontext1], [two][synccontext2], [three][synccontext3].
 
