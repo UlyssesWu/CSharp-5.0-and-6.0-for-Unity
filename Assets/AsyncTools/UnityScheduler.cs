@@ -9,11 +9,13 @@ using SyncronizationContextQueue = System.Collections.Concurrent.BlockingCollect
 public class UnityScheduler : MonoBehaviour
 {
 	public static UnityScheduler Instance { get; private set; }
+
 	[Obsolete("Use UnityScheduler.MainThreadScheduler instead.")]
 	public static UnityTaskScheduler MainThread => UnityTaskScheduler.GetInstance();
 	public static UnityTaskScheduler MainThreadScheduler => UnityTaskScheduler.GetInstance();
 	public static TaskScheduler ThreadPoolScheduler => TaskScheduler.Default;
 	public static int MainThreadId { get; private set; }
+	public static SynchronizationContext SynchronizationContext => Instance.synchronizationContext;
 
 	private UnitySynchronizationContext synchronizationContext;
 
@@ -69,9 +71,7 @@ public class UnityScheduler : MonoBehaviour
 		private static UnityTaskScheduler instance;
 		public readonly BlockingCollection<Task> mainThreadQueue = new BlockingCollection<Task>();
 
-		private UnityTaskScheduler()
-		{
-		}
+		private UnityTaskScheduler() { }
 
 		internal static UnityTaskScheduler GetInstance() => instance ?? (instance = new UnityTaskScheduler());
 

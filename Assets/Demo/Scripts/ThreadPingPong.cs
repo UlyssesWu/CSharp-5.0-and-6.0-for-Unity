@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 internal class ThreadPingPong : MonoBehaviour
@@ -60,9 +61,9 @@ internal class ThreadPingPong : MonoBehaviour
 	public async void TaskRunSynchronouslyBackgroundThreadDemo()
 	{
 		Debug.Log("Launched from a background thread...");
-		var task2 = new Task(RunTasksSynchronously);
-		task2.Start(UnityScheduler.ThreadPoolScheduler);
-		await task2;
+		var task = new Task(RunTasksSynchronously);
+		task.Start(UnityScheduler.ThreadPoolScheduler);
+		await task;
 		Debug.Log("done");
 	}
 
@@ -95,5 +96,43 @@ internal class ThreadPingPong : MonoBehaviour
 
 		task = new Task(() => AsyncTools.WhereAmI("6"));
 		task.RunSynchronously(UnityScheduler.MainThreadScheduler);
+	}
+
+	public async void ContextSwitchMainThreadDemo()
+	{
+		Debug.Log("Launched from the main thread...");
+		await TestContextSwitch();
+		Debug.Log("done");
+	}
+
+	public async void ContextSwitchBackgroundThreadDemo()
+	{
+		Debug.Log("Launched from a background thread...");
+		var task = new Task(async () => await TestContextSwitch());
+		task.Start(UnityScheduler.ThreadPoolScheduler);
+		await task;
+		Debug.Log("done");
+	}
+
+	private static async Task TestContextSwitch()
+	{
+		AsyncTools.WhereAmI("1");
+
+		await AsyncTools.ToThreadPool();
+		AsyncTools.WhereAmI("2");
+
+		await AsyncTools.ToMainThread();
+		AsyncTools.WhereAmI("3");
+
+		await AsyncTools.ToThreadPool();
+		AsyncTools.WhereAmI("4");
+
+		await AsyncTools.ToMainThread();
+		AsyncTools.WhereAmI("5");
+
+		await 1;
+
+		await AsyncTools.ToMainThread();
+		AsyncTools.WhereAmI("5");
 	}
 }

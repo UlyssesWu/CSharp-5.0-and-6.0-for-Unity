@@ -5,14 +5,40 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 public static class AsyncTools
 {
+	private static readonly Awaiter mainThreadAwaiter = new SynchronizationContextAwaiter(UnityScheduler.SynchronizationContext);
+	private static readonly Awaiter threadPoolAwaiter = new ThreadPoolContextAwaiter();
+	private static readonly Awaiter doNothingAwaiter = new DoNothingAwaiter();
+
 	public static void WhereAmI(string text)
 	{
-		var threadId = Thread.CurrentThread.ManagedThreadId;
-		Debug.Log(text + ": " + (threadId == UnityScheduler.MainThreadId ? "main thread" : "background thread #" + threadId));
+		if (IsMainThread())
+		{
+			Debug.Log($"{text}: main thread, frame {Time.frameCount}");
+		}
+		else
+		{
+			Debug.Log($"{text}: background thread #{Thread.CurrentThread.ManagedThreadId}");
+		}
+	}
+
+	public static bool IsMainThread()
+	{
+		return Thread.CurrentThread.ManagedThreadId == UnityScheduler.MainThreadId;
+	}
+
+	public static Awaiter ToThreadPool()
+	{
+		return IsMainThread() ? threadPoolAwaiter : doNothingAwaiter;
+	}
+
+	public static Awaiter ToMainThread()
+	{
+		return IsMainThread() ? doNothingAwaiter : mainThreadAwaiter;
 	}
 
 	public static Task<byte[]> DownloadAsBytesAsync(string address)
@@ -54,11 +80,17 @@ public static class AsyncTools
 		return GetAwaiter((float)seconds);
 	}
 
+	/// <summary>
+	/// Waits until all the tasks are completed
+	/// </summary>
 	public static TaskAwaiter GetAwaiter(this IEnumerable<Task> tasks)
 	{
 		return TaskEx.WhenAll(tasks).GetAwaiter();
 	}
 
+	/// <summary>
+	/// Waits until the process exits
+	/// </summary>
 	public static TaskAwaiter<int> GetAwaiter(this Process process)
 	{
 		var tcs = new TaskCompletionSource<int>();
@@ -70,4 +102,41 @@ public static class AsyncTools
 		}
 		return tcs.Task.GetAwaiter();
 	}
+
+	#region Context switching awaiter classes
+
+	public abstract class Awaiter : INotifyCompletion
+	{
+		public abstract void OnCompleted(Action continuation);
+		public Awaiter GetAwaiter() => this;
+		public abstract bool IsCompleted { get; }
+		public void GetResult() { }
+	}
+
+	private class DoNothingAwaiter : Awaiter
+	{
+		public override bool IsCompleted => true;
+		public override void OnCompleted(Action action) => action();
+	}
+
+	private class SynchronizationContextAwaiter : Awaiter
+	{
+		private readonly SynchronizationContext context;
+
+		public SynchronizationContextAwaiter(SynchronizationContext context)
+		{
+			this.context = context;
+		}
+
+		public override bool IsCompleted => false;
+		public override void OnCompleted(Action action) => context.Post(state => action(), null);
+	}
+
+	private class ThreadPoolContextAwaiter : Awaiter
+	{
+		public override bool IsCompleted => false;
+		public override void OnCompleted(Action action) => ThreadPool.QueueUserWorkItem(state => action(), null);
+	}
+
+	#endregion
 }
