@@ -18,11 +18,11 @@ public static class AsyncTools
 	{
 		if (IsMainThread())
 		{
-			Debug.Log($"{text}: main thread, frame {Time.frameCount}");
+			Debug.Log($"{text}: main thread, frame: {Time.frameCount}");
 		}
 		else
 		{
-			Debug.Log($"{text}: background thread #{Thread.CurrentThread.ManagedThreadId}");
+			Debug.Log($"{text}: background thread, id: {Thread.CurrentThread.ManagedThreadId}");
 		}
 	}
 
