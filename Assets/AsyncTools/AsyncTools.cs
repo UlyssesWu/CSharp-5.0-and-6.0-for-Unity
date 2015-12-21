@@ -26,16 +26,37 @@ public static class AsyncTools
 		}
 	}
 
+	/// <summary>
+	/// Returns true if called from the Unity's main thread, and false otherwise.
+	/// </summary>
 	public static bool IsMainThread()
 	{
 		return Thread.CurrentThread.ManagedThreadId == UnityScheduler.MainThreadId;
 	}
 
+	/// <summary>
+	/// Switches execution to a background thread.
+	/// <code>
+	/// 
+	/// // stuff to do in the main thread
+	/// await AsyncTools.ToThreadPool();
+	/// // stuff to do in a background thead
+	/// </code>
+	/// </summary>
 	public static Awaiter ToThreadPool()
 	{
 		return IsMainThread() ? threadPoolAwaiter : doNothingAwaiter;
 	}
 
+	/// <summary>
+	/// Switches execution to the main thread.
+	/// <code>
+	///
+	/// // stuff to do in a background thead
+	/// await AsyncTools.ToMainThread(); 
+	/// // stuff to do in the main thread
+	/// </code>
+	/// </summary>
 	public static Awaiter ToMainThread()
 	{
 		return IsMainThread() ? doNothingAwaiter : mainThreadAwaiter;
@@ -69,19 +90,31 @@ public static class AsyncTools
 		return task;
 	}
 
+	/// <summary>
+	/// <code>
+	/// await 0.5f; // Wait for 0.5 seconds
+	/// await 0f; // If called from the main thread effectively means "wait until the next frame".
+	/// </code>
+	/// </summary>
 	public static TaskAwaiter GetAwaiter(this float seconds)
 	{
 		seconds = Math.Max(seconds, .001f); // makes 'await 0f' an equivalent of Unity's 'yield return null'
 		return TaskEx.Delay((int)(seconds * 1000)).GetAwaiter();
 	}
 
+	/// <summary>
+	/// <code>
+	/// await 10; // Wait for 10 seconds
+	/// await 0; // If called from the main thread effectively means "wait until the next frame".
+	/// </code>
+	/// </summary>
 	public static TaskAwaiter GetAwaiter(this int seconds)
 	{
 		return GetAwaiter((float)seconds);
 	}
 
 	/// <summary>
-	/// Waits until all the tasks are completed
+	/// Waits until all the tasks are completed.
 	/// </summary>
 	public static TaskAwaiter GetAwaiter(this IEnumerable<Task> tasks)
 	{
@@ -89,7 +122,7 @@ public static class AsyncTools
 	}
 
 	/// <summary>
-	/// Waits until the process exits
+	/// Waits until the process exits.
 	/// </summary>
 	public static TaskAwaiter<int> GetAwaiter(this Process process)
 	{
@@ -107,9 +140,9 @@ public static class AsyncTools
 
 	public abstract class Awaiter : INotifyCompletion
 	{
+		public abstract bool IsCompleted { get; }
 		public abstract void OnCompleted(Action continuation);
 		public Awaiter GetAwaiter() => this;
-		public abstract bool IsCompleted { get; }
 		public void GetResult() { }
 	}
 
