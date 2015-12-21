@@ -9,20 +9,21 @@ internal class ThreadPingPong : MonoBehaviour
 	{
 		AsyncTools.WhereAmI("1"); // main thread
 
-		var task1 = new Task(() => AsyncTools.WhereAmI("2")); // background thread
-		task1.Start(UnityScheduler.ThreadPoolScheduler);
+		var task1 = Task.Factory.StartNew(() => AsyncTools.WhereAmI("2")); // background thread
 
 		var task2 = new Task(() => AsyncTools.WhereAmI("3")); // main thread
 		task2.Start(UnityScheduler.MainThreadScheduler);
 
-		var task3 = new Task(() => AsyncTools.WhereAmI("4")); // background thread
-		task3.Start(UnityScheduler.ThreadPoolScheduler);
+		var task3 = Task.Factory.StartNew(() => AsyncTools.WhereAmI("5")); // background thread
 
 		// returns execution of asynchronous method to the main thread,
 		// if it was originally called from the main thread
 		await TaskEx.WhenAll(task1, task2, task3);
-
 		AsyncTools.WhereAmI("5"); // main thread
+
+		await TaskEx.Delay(100).ConfigureAwait(false);
+		AsyncTools.WhereAmI("6"); // can be any thread, since the previous line states that we don't care
+
 		Debug.Log("done");
 	}
 
@@ -32,7 +33,7 @@ internal class ThreadPingPong : MonoBehaviour
 	{
 		AsyncTools.WhereAmI("1"); // main thread
 
-		var originalTask = new Task(() => AsyncTools.WhereAmI("2")); // background thread
+		var originalTask = new Task(() => AsyncTools.WhereAmI("2"));
 
 		var continuationTask1 = originalTask.ContinueWith(
 			previousTask => AsyncTools.WhereAmI("3"),
@@ -48,7 +49,7 @@ internal class ThreadPingPong : MonoBehaviour
 		var continuationTask4 = continuationTask3.ContinueWith(
 			previousTask => AsyncTools.WhereAmI("6")); // background thread
 
-		originalTask.Start(UnityScheduler.ThreadPoolScheduler);
+		originalTask.Start(UnityScheduler.ThreadPoolScheduler);  // start the task chain from a background thread
 
 		await continuationTask4;
 		Debug.Log("done");
@@ -66,9 +67,8 @@ internal class ThreadPingPong : MonoBehaviour
 	public async void TaskRunSynchronouslyBackgroundThreadDemo()
 	{
 		Debug.Log("Launched from a background thread...");
-		var task = new Task(RunTasksSynchronously);
-		task.Start(UnityScheduler.ThreadPoolScheduler);
-		await task;
+
+		await Task.Factory.StartNew(RunTasksSynchronously);
 		Debug.Log("done");
 	}
 
@@ -115,9 +115,7 @@ internal class ThreadPingPong : MonoBehaviour
 	public async void ContextSwitchBackgroundThreadDemo()
 	{
 		Debug.Log("Launched from a background thread...");
-		var task = new Task<Task>(async () => await TestContextSwitch());
-		task.Start(UnityScheduler.ThreadPoolScheduler);
-		await await task;
+		await Task.Factory.StartNew(async () => await TestContextSwitch()).Unwrap();
 		Debug.Log("done");
 	}
 
