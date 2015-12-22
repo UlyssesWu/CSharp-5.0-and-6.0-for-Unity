@@ -81,19 +81,6 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
         Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
     
-    * Getter-only auto-property initialization *(PropertyInitializerTest.cs)*
-    
-            class Abc { }
-
-            class Test
-            {
-	           public Abc Abc { get; }
-	           public Test()
-	           {
-		          Abc = new Abc(); // error CS0118: `Abc' is a `type' but a `variable' was expected
-	           }
-            }
-
 # Random notes #
 
 * Roslyn compiler was taken from VS 2015 installation.
@@ -104,7 +91,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you would want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context, like all WinForms and WPF applications do.
 
-    Check `UnityScheduler.cs` example located inside the project or just put `UnityScheduler` prefab in your first scene. The scripts creates and registers a synchronization context for the Unity's main thread, so async/await could work the way they do in regular WinForms or WPF applications.
+    Check `UnityScheduler.cs` example implementation located inside the project or just put `UnityScheduler` prefab in your first scene. The script creates and registers a synchronization context for the Unity's main thread, so async/await could work the way they do in regular WinForms or WPF applications.
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [one][synccontext1], [two][synccontext2], [three][synccontext3].
 
