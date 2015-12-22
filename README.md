@@ -81,19 +81,6 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
         Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
     
-    * Getter-only auto-property initialization *(PropertyInitializerTest.cs)*
-    
-            class Abc { }
-
-            class Test
-            {
-	           public Abc Abc { get; }
-	           public Test()
-	           {
-		          Abc = new Abc(); // error CS0118: `Abc' is a `type' but a `variable' was expected
-	           }
-            }
-
 # Random notes #
 
 * Roslyn compiler was taken from VS 2015 installation.
