@@ -60,7 +60,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * C# 5.0/6.0 is not compatible with Unity Cloud Build service for obvious reason.
 
-* WebPlayer platform is not supported.
+* WebPlayer platform is not supported. No serious problems, it just requires some additional effort.
 
 * AsyncBrigde stuff is not compatible with Windows Store Application platform due to API differences between the recent versions of .Net Framework and the ancient version of System.Threading.dll that comes with AsyncBridge. Namely, you can't use async/await, caller information attributes and everything from System.Threading.dll (concurrent collections for example).
 
@@ -85,7 +85,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * Roslyn compiler was taken from VS 2015 installation.
 
-* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.0.4][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
+* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.2.1.102][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
 * AsyncBridge library provides a set of types that makes it possible to use _async/await_ in projects that target CLR 2.0. For more information, check [this blog post][asyncbridge].
 
