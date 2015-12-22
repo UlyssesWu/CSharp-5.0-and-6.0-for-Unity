@@ -13,8 +13,7 @@ internal class PropertyInitializerTest : MonoBehaviour
 	}
 }
 
-#warning Mono 4.0.3 compiler fails this test
-/*
+// Mono C# compiler version 4.2.1.0 passes this test:
 internal class Abc { }
 
 internal class Test
@@ -23,8 +22,7 @@ internal class Test
 
 	public Test()
 	{
-		Abc = new Abc(); // Mono 4.0.3 compiler fails here
-			// error CS0118: `Abc' is a `type' but a `variable' was expected
+		Abc = new Abc(); // Earlier versions of Mono C# compiler were failing here, throwing
+						 // error CS0118: `Abc' is a `type' but a `variable' was expected
 	}
 }
-*/
