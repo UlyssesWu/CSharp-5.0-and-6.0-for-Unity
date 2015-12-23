@@ -9,7 +9,7 @@ internal class NullConditionalTest : MonoBehaviour
 
 		Debug.Log("Number of foos: " + foo?.Length);
 
-#warning Mono C# compiler version 4.2.1.0 compiler fails this test
+#warning Mono C# compiler version 4.2.1.0 fails this test
 		/*
 		Debug.Log("3th bar has value: " + (bar?[3]).HasValue); // Mono C# compiler fails here, throwing
 		   // error CS1061: Type `int' does not contain a definition for `HasValue' and no extension method `HasValue'
