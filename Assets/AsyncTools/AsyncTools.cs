@@ -62,32 +62,28 @@ public static class AsyncTools
 		return IsMainThread() ? doNothingAwaiter : mainThreadAwaiter;
 	}
 
-	public static Task<byte[]> DownloadAsBytesAsync(string address)
+	public static Task<byte[]> DownloadAsBytesAsync(string address, CancellationToken cancellationToken = new CancellationToken())
 	{
-		var task = new Task<byte[]>(
-			() =>
+		return Task.Factory.StartNew(
+			delegate
 			{
 				using (var webClient = new WebClient())
 				{
 					return webClient.DownloadData(address);
 				}
-			});
-		task.Start(UnityScheduler.ThreadPoolScheduler);
-		return task;
+			}, cancellationToken);
 	}
 
-	public static Task<string> DownloadAsStringAsync(string address)
+	public static Task<string> DownloadAsStringAsync(string address, CancellationToken cancellationToken = new CancellationToken())
 	{
-		var task = new Task<string>(
-			() =>
+		return Task.Factory.StartNew(
+			delegate
 			{
 				using (var webClient = new WebClient())
 				{
 					return webClient.DownloadString(address);
 				}
-			});
-		task.Start(UnityScheduler.ThreadPoolScheduler);
-		return task;
+			}, cancellationToken);
 	}
 
 	/// <summary>
