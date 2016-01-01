@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UnityEngine;
 
 internal class ThreadPingPong : MonoBehaviour
@@ -49,7 +47,7 @@ internal class ThreadPingPong : MonoBehaviour
 		var continuationTask4 = continuationTask3.ContinueWith(
 			previousTask => AsyncTools.WhereAmI("6")); // background thread
 
-		originalTask.Start(UnityScheduler.ThreadPoolScheduler);  // start the task chain from a background thread
+		originalTask.Start(UnityScheduler.ThreadPoolScheduler); // start the task chain from a background thread
 
 		await continuationTask4;
 		Debug.Log("done");
