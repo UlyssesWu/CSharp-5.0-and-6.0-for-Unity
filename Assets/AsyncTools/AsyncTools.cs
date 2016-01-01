@@ -10,7 +10,9 @@ using Debug = UnityEngine.Debug;
 
 public static class AsyncTools
 {
-	private static readonly Awaiter mainThreadAwaiter = new SynchronizationContextAwaiter(UnityScheduler.SynchronizationContext);
+	private static readonly Awaiter updateAwaiter = new SynchronizationContextAwaiter(UnityScheduler.UpdateContext);
+	private static readonly Awaiter fixedAwaiter = new SynchronizationContextAwaiter(UnityScheduler.FixedUpdateContext);
+	private static readonly Awaiter lateUpdateAwaiter = new SynchronizationContextAwaiter(UnityScheduler.LateUpdateContext);
 	private static readonly Awaiter threadPoolAwaiter = new ThreadPoolContextAwaiter();
 	private static readonly Awaiter doNothingAwaiter = new DoNothingAwaiter();
 
@@ -18,7 +20,8 @@ public static class AsyncTools
 	{
 		if (IsMainThread())
 		{
-			Debug.Log($"{text}: main thread, frame: {Time.frameCount}");
+			var contextName = (SynchronizationContext.Current as UnitySynchronizationContext)?.Name ?? "No context";
+			Debug.Log($"{text}: main thread, {contextName}, frame: {Time.frameCount}");
 		}
 		else
 		{
@@ -29,10 +32,7 @@ public static class AsyncTools
 	/// <summary>
 	/// Returns true if called from the Unity's main thread, and false otherwise.
 	/// </summary>
-	public static bool IsMainThread()
-	{
-		return Thread.CurrentThread.ManagedThreadId == UnityScheduler.MainThreadId;
-	}
+	public static bool IsMainThread() => Thread.CurrentThread.ManagedThreadId == UnityScheduler.MainThreadId;
 
 	/// <summary>
 	/// Switches execution to a background thread.
@@ -49,19 +49,51 @@ public static class AsyncTools
 	}
 
 	/// <summary>
-	/// Switches execution to the main thread.
+	/// Switches execution to the Update context of the main thread.
 	/// <code>
-	///
-	/// // stuff to do in a background thead
-	/// await AsyncTools.ToMainThread(); 
+	/// 
+	/// await AsyncTools.ToMainThread();
 	/// // stuff to do in the main thread
 	/// </code>
 	/// </summary>
-	public static Awaiter ToMainThread()
-	{
-		return IsMainThread() ? doNothingAwaiter : mainThreadAwaiter;
-	}
+	[Obsolete("Use ToUpdate(), ToLateUpdate() or ToFixedUpdate() instead.")]
+	public static Awaiter ToMainThread() => updateAwaiter;
 
+	/// <summary>
+	/// Switches execution to the Update context of the main thread.
+	/// <code>
+	/// 
+	/// await AsyncTools.ToUpdate();
+	/// // stuff to do in the Update context of the main thread
+	/// </code>
+	/// </summary>
+	public static Awaiter ToUpdate() => updateAwaiter;
+
+	/// <summary>
+	/// Switches execution to the LateUpdate context of the main thread.
+	/// <code>
+	/// 
+	/// await AsyncTools.ToLateUpdate();
+	/// // stuff to do in the LateUpdate context of the main thread
+	/// </code>
+	/// </summary>
+	public static Awaiter ToLateUpdate() => lateUpdateAwaiter;
+
+	/// <summary>
+	/// Switches execution to the FixedUpdate context of the main thread.
+	/// <code>
+	/// 
+	/// await AsyncTools.ToFixedUpdate();
+	/// // stuff to do in the FixedUpdate context of the main thread
+	/// </code>
+	/// </summary>
+	public static Awaiter ToFixedUpdate() => fixedAwaiter;
+
+	/// <summary>
+	/// Downloads a file as an array of bytes.
+	/// </summary>
+	/// <param name="address">File URL</param>
+	/// <param name="cancellationToken">Optional cancellation token</param>
 	public static Task<byte[]> DownloadAsBytesAsync(string address, CancellationToken cancellationToken = new CancellationToken())
 	{
 		return Task.Factory.StartNew(
@@ -74,6 +106,11 @@ public static class AsyncTools
 			}, cancellationToken);
 	}
 
+	/// <summary>
+	/// Downloads a file as a string.
+	/// </summary>
+	/// <param name="address">File URL</param>
+	/// <param name="cancellationToken">Optional cancellation token</param>
 	public static Task<string> DownloadAsStringAsync(string address, CancellationToken cancellationToken = new CancellationToken())
 	{
 		return Task.Factory.StartNew(
@@ -104,18 +141,12 @@ public static class AsyncTools
 	/// await 0; // If called from the main thread effectively means "wait until the next frame".
 	/// </code>
 	/// </summary>
-	public static TaskAwaiter GetAwaiter(this int seconds)
-	{
-		return GetAwaiter((float)seconds);
-	}
+	public static TaskAwaiter GetAwaiter(this int seconds) => GetAwaiter((float)seconds);
 
 	/// <summary>
 	/// Waits until all the tasks are completed.
 	/// </summary>
-	public static TaskAwaiter GetAwaiter(this IEnumerable<Task> tasks)
-	{
-		return TaskEx.WhenAll(tasks).GetAwaiter();
-	}
+	public static TaskAwaiter GetAwaiter(this IEnumerable<Task> tasks) => TaskEx.WhenAll(tasks).GetAwaiter();
 
 	/// <summary>
 	/// Waits until the process exits.
@@ -150,9 +181,9 @@ public static class AsyncTools
 
 	private class SynchronizationContextAwaiter : Awaiter
 	{
-		private readonly SynchronizationContext context;
+		private readonly UnitySynchronizationContext context;
 
-		public SynchronizationContextAwaiter(SynchronizationContext context)
+		public SynchronizationContextAwaiter(UnitySynchronizationContext context)
 		{
 			this.context = context;
 		}

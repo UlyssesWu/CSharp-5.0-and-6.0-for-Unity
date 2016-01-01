@@ -5,7 +5,7 @@ using UnityEngine;
 
 internal class ThreadPingPong : MonoBehaviour
 {
-	public async void AsyncAwaitDemo()
+	public async void AsyncAwaitEventHandler()
 	{
 		AsyncTools.WhereAmI("1"); // main thread
 
@@ -29,7 +29,7 @@ internal class ThreadPingPong : MonoBehaviour
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public async void TaskContinueWithDemo()
+	public async void TaskContinueWithEventHandler()
 	{
 		AsyncTools.WhereAmI("1"); // main thread
 
@@ -57,14 +57,14 @@ internal class ThreadPingPong : MonoBehaviour
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public void TaskRunSynchronouslyMainThreadDemo()
+	public void TaskRunSynchronouslyFromMainThreadEventHandler()
 	{
 		Debug.Log("Launched from the main thread...");
 		RunTasksSynchronously();
 		Debug.Log("done");
 	}
 
-	public async void TaskRunSynchronouslyBackgroundThreadDemo()
+	public async void TaskRunSynchronouslyFromBackgroundThreadEventHandler()
 	{
 		Debug.Log("Launched from a background thread...");
 
@@ -105,14 +105,14 @@ internal class ThreadPingPong : MonoBehaviour
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public async void ContextSwitchMainThreadDemo()
+	public async void ContextSwitchFromMainThreadEventHandler()
 	{
 		Debug.Log("Launched from the main thread...");
 		await TestContextSwitch();
 		Debug.Log("done");
 	}
 
-	public async void ContextSwitchBackgroundThreadDemo()
+	public async void ContextSwitchFromBackgroundThreadEventHandler()
 	{
 		Debug.Log("Launched from a background thread...");
 		await Task.Factory.StartNew(async () => await TestContextSwitch()).Unwrap();
@@ -125,14 +125,22 @@ internal class ThreadPingPong : MonoBehaviour
 
 		await AsyncTools.ToThreadPool();
 		AsyncTools.WhereAmI("2");
-
-		await AsyncTools.ToMainThread();
+		await 0;
 		AsyncTools.WhereAmI("3");
 
-		await AsyncTools.ToThreadPool();
-		AsyncTools.WhereAmI("4");
-
-		await AsyncTools.ToMainThread();
+		await AsyncTools.ToUpdate();
 		AsyncTools.WhereAmI("5");
+		await 0;
+		AsyncTools.WhereAmI("6");
+
+		await AsyncTools.ToLateUpdate();
+		AsyncTools.WhereAmI("8");
+		await 0;
+		AsyncTools.WhereAmI("9");
+
+		await AsyncTools.ToFixedUpdate();
+		AsyncTools.WhereAmI("11");
+		await 0;
+		AsyncTools.WhereAmI("12");
 	}
 }

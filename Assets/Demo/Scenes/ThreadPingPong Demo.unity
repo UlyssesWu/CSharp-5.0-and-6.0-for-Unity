@@ -440,7 +440,14 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'AsyncTools.ToMainThread/ToThreadPool
+  m_Text: 'AsyncTools.ToThreadPool()
+
+    .ToUpdate()
+
+    .ToLateUpdate()
+
+    .ToFixedUpdate()
+
 
     from the main thread'
 --- !u!222 &838658431
@@ -482,8 +489,8 @@ RectTransform:
   m_RootOrder: 5
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 5, y: -90}
-  m_SizeDelta: {x: 300, y: 60}
+  m_AnchoredPosition: {x: 5, y: -131}
+  m_SizeDelta: {x: 300, y: 123}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &863602135
 MonoBehaviour:
@@ -525,7 +532,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 592033042}
-        m_MethodName: ContextSwitchBackgroundThreadDemo
+        m_MethodName: ContextSwitchFromBackgroundThreadEventHandler
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -646,7 +653,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 592033042}
-        m_MethodName: TaskRunSynchronouslyBackgroundThreadDemo
+        m_MethodName: TaskRunSynchronouslyFromBackgroundThreadEventHandler
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -830,7 +837,14 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'AsyncTools.ToMainThread/ToThreadPool
+  m_Text: 'AsyncTools.ToThreadPool()
+
+    .ToUpdate()
+
+    .ToLateUpdate()
+
+    .ToFixedUpdate()
+
 
     from a background thread'
 --- !u!222 &1361344781
@@ -915,7 +929,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 592033042}
-        m_MethodName: TaskContinueWithDemo
+        m_MethodName: TaskContinueWithEventHandler
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1173,7 +1187,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 592033042}
-        m_MethodName: AsyncAwaitDemo
+        m_MethodName: AsyncAwaitEventHandler
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1294,7 +1308,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 592033042}
-        m_MethodName: TaskRunSynchronouslyMainThreadDemo
+        m_MethodName: TaskRunSynchronouslyFromMainThreadEventHandler
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1414,8 +1428,8 @@ RectTransform:
   m_RootOrder: 4
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5, y: -90}
-  m_SizeDelta: {x: 300, y: 60}
+  m_AnchoredPosition: {x: -5, y: -131}
+  m_SizeDelta: {x: 300, y: 123}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &2106906634
 MonoBehaviour:
@@ -1457,7 +1471,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 592033042}
-        m_MethodName: ContextSwitchMainThreadDemo
+        m_MethodName: ContextSwitchFromMainThreadEventHandler
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
