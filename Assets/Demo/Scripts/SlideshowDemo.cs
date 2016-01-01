@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -58,6 +59,7 @@ public class SlideshowDemo : MonoBehaviour
 
 	private async Task ShowRandomImages(int count, CancellationToken cancellationToken)
 	{
+
 		for (int i = 0; i < count; i++)
 		{
 			var image = await AsyncTools.DownloadAsBytesAsync("http://placeimg.com/320/200", cancellationToken);
