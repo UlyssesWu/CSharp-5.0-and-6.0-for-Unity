@@ -15,11 +15,11 @@ internal class Mono60Compiler : Compiler
 		string processArguments;
 		if (platform == Platform.Windows)
 		{
-			processArguments = $"-sdk:2 -langversion:Default -r:\"{systemCoreDllPath}\" {responseFile}";
+			processArguments = $"-sdk:2 -debug+ -langversion:Default -r:\"{systemCoreDllPath}\" {responseFile}";
 		}
 		else
 		{
-			processArguments = $"-sdk:2 -langversion:Default {responseFile}";
+			processArguments = $"-sdk:2 -debug+ -langversion:Default {responseFile}";
 		}
 
 		var process = new Process();
