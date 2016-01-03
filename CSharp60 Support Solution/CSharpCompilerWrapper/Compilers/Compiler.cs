@@ -42,6 +42,7 @@ internal abstract class Compiler
 		process.BeginOutputReadLine();
 		process.BeginErrorReadLine();
 		process.WaitForExit();
+
 		logger?.Append($"Exit code: {process.ExitCode}");
 
 		return process.ExitCode;
@@ -79,10 +80,10 @@ internal abstract class Compiler
 
 	protected abstract Process CreateCompilerProcess(Platform platform, string unityEditorDataDir, string responseFile);
 
-	public virtual void ConvertDebugSymbols(Platform platform, string libraryPath, string unityEditorDataDir) { }
+	public virtual void ConvertDebugSymbols(Platform platform, string targetAssemblyPath, string unityEditorDataDir) { }
 
-	protected static ProcessStartInfo CreateOSDependentStartInfo(Platform platform, ProcessRuntime processRuntime, string processPath, string processArguments,
-																 string unityEditorDataDir)
+	protected static ProcessStartInfo CreateOSDependentStartInfo(Platform platform, ProcessRuntime processRuntime, string processPath,
+																 string processArguments, string unityEditorDataDir)
 	{
 		ProcessStartInfo startInfo;
 
