@@ -83,8 +83,8 @@ internal class Program
 		stopwatch.Reset();
 		stopwatch.Start();
 
-		var libraryPath = Path.Combine("Temp", targetAssembly);
-		compiler.ConvertDebugSymbols(CurrentPlatform, libraryPath, unityEditorDataDir);
+		var targetAssemblyPath = Path.Combine("Temp", targetAssembly);
+		compiler.ConvertDebugSymbols(CurrentPlatform, targetAssemblyPath, unityEditorDataDir);
 
 		stopwatch.Stop();
 		logger?.Append($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");

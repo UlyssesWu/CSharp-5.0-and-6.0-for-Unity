@@ -32,12 +32,12 @@ internal class Microsoft60Compiler : Compiler
 		return process;
 	}
 
-	public override void ConvertDebugSymbols(Platform platform, string libraryPath, string unityEditorDataDir)
+	public override void ConvertDebugSymbols(Platform platform, string targetAssemblyPath, string unityEditorDataDir)
 	{
 		outputLines.Clear();
 
 		var process = new Process();
-		process.StartInfo = CreateOSDependentStartInfo(platform, ProcessRuntime.CLR40, pbd2MdbPath, libraryPath, unityEditorDataDir);
+		process.StartInfo = CreateOSDependentStartInfo(platform, ProcessRuntime.CLR40, pbd2MdbPath, targetAssemblyPath, unityEditorDataDir);
 		process.OutputDataReceived += (sender, e) => outputLines.Add(e.Data);
 
 		logger?.Append($"Process: {process.StartInfo.FileName}");
@@ -48,7 +48,7 @@ internal class Microsoft60Compiler : Compiler
 		process.WaitForExit();
 		logger?.Append($"Exit code: {process.ExitCode}");
 
-		var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(libraryPath) + ".pdb");
+		var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(targetAssemblyPath) + ".pdb");
 		File.Delete(pdbPath);
 	}
 
