@@ -1,39 +1,86 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 public class UnityTaskScheduler : TaskScheduler
 {
-	public readonly BlockingCollection<Task> mainThreadQueue = new BlockingCollection<Task>();
+	public string Name { get; }
+	public UnitySynchronizationContext Context { get; }
+	private readonly LinkedList<Task> queue = new LinkedList<Task>();
+
+	public UnityTaskScheduler(string name)
+	{
+		Name = name;
+		Context = new UnitySynchronizationContext(name);
+	}
+
+	public void Activate()
+	{
+		SynchronizationContext.SetSynchronizationContext(Context);
+
+		ExecutedPendingTasks();
+		Context.ExecutePendingContinuations();
+	}
 
 	protected override IEnumerable<Task> GetScheduledTasks()
 	{
-		return mainThreadQueue;
+		lock (queue)
+		{
+			return queue.ToArray();
+		}
 	}
 
 	protected override void QueueTask(Task task)
 	{
-		mainThreadQueue.Add(task);
+		lock (queue)
+		{
+			queue.AddLast(task);
+		}
 	}
 
 	protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
 	{
-		if (Thread.CurrentThread.ManagedThreadId != UnityScheduler.MainThreadId)
+		if (Context != SynchronizationContext.Current)
 		{
 			return false;
+		}
+
+		if (taskWasPreviouslyQueued)
+		{
+			lock (queue)
+			{
+				queue.Remove(task);
+			}
 		}
 
 		return TryExecuteTask(task);
 	}
 
-	public void ExecuteTask(Task task)
+	private void ExecutedPendingTasks()
 	{
-		var result = TryExecuteTask(task);
-		if (result == false)
+		while (true)
 		{
-			throw new InvalidOperationException();
+			Task task;
+			lock (queue)
+			{
+				if (queue.Count == 0)
+				{
+					break;
+				}
+				task = queue.First.Value;
+				queue.RemoveFirst();
+			}
+
+			if (task != null)
+			{
+				var result = TryExecuteTask(task);
+				if (result == false)
+				{
+					throw new InvalidOperationException();
+				}
+			}
 		}
 	}
 }

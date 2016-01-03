@@ -5,19 +5,19 @@ internal class ThreadPingPong : MonoBehaviour
 {
 	public async void AsyncAwaitEventHandler()
 	{
-		AsyncTools.WhereAmI("1"); // main thread
+		AsyncTools.WhereAmI("1"); // main thread, Update context
 
 		var task1 = Task.Factory.StartNew(() => AsyncTools.WhereAmI("2")); // background thread
 
-		var task2 = new Task(() => AsyncTools.WhereAmI("3")); // main thread
-		task2.Start(UnityScheduler.MainThreadScheduler);
+		var task2 = new Task(() => AsyncTools.WhereAmI("3")); // main thread, FixedUpdate context
+		task2.Start(UnityScheduler.FixedUpdateScheduler);
 
-		var task3 = Task.Factory.StartNew(() => AsyncTools.WhereAmI("5")); // background thread
+		var task3 = Task.Factory.StartNew(() => AsyncTools.WhereAmI("4")); // background thread
 
 		// returns execution of asynchronous method to the main thread,
 		// if it was originally called from the main thread
 		await TaskEx.WhenAll(task1, task2, task3);
-		AsyncTools.WhereAmI("5"); // main thread
+		AsyncTools.WhereAmI("5"); // main thread, Update context
 
 		await TaskEx.Delay(100).ConfigureAwait(false);
 		AsyncTools.WhereAmI("6"); // can be any thread, since the previous line states that we don't care
@@ -35,14 +35,14 @@ internal class ThreadPingPong : MonoBehaviour
 
 		var continuationTask1 = originalTask.ContinueWith(
 			previousTask => AsyncTools.WhereAmI("3"),
-			UnityScheduler.MainThreadScheduler); // main thread
+			UnityScheduler.UpdateScheduler); // main thread, Update context
 
 		var continuationTask2 = continuationTask1.ContinueWith(
 			previousTask => AsyncTools.WhereAmI("4")); // background thread
 
 		var continuationTask3 = continuationTask2.ContinueWith(
 			previousTask => AsyncTools.WhereAmI("5"),
-			UnityScheduler.MainThreadScheduler); // main thread
+			UnityScheduler.FixedUpdateScheduler); // main thread, FixedUpdate context
 
 		var continuationTask4 = continuationTask3.ContinueWith(
 			previousTask => AsyncTools.WhereAmI("6")); // background thread
@@ -80,25 +80,36 @@ internal class ThreadPingPong : MonoBehaviour
 		
 		If this method is called from a background thread, the tasks associated with the thread pool scheduler
 		will be executed on the current background thread, and the tasks associated with the main thread scheduler will be
-		executed on the main thread and the current background thread will be blocked until the execution completes.
+		executed on the main thread while the background thread will be blocked until the execution completes.
+		*/
+
+		/*                   ATTENTION!!! ВНИМАНИЕ!!! ¡¡¡ATENCIÓN!!!
+
+		Using UpdateScheduler, LateUpdateScheduler or FixedUpdateScheduler for running
+		tasks synchronously from the main thread will cause a DEADLOCK if the current
+		context doesn't match the task scheduler's type.
+
+		E.g. don't call task.RunSynchronously(UnityScheduler.FixedUpdateScheduler) from
+		the Update method.
+
 		*/
 
 		AsyncTools.WhereAmI("1");
 
 		var task = new Task(() => AsyncTools.WhereAmI("2"));
-		task.RunSynchronously(UnityScheduler.MainThreadScheduler);
+		task.RunSynchronously(UnityScheduler.UpdateScheduler);
 
 		task = new Task(() => AsyncTools.WhereAmI("3"));
 		task.RunSynchronously(UnityScheduler.ThreadPoolScheduler);
 
 		task = new Task(() => AsyncTools.WhereAmI("4"));
-		task.RunSynchronously(UnityScheduler.MainThreadScheduler);
+		task.RunSynchronously(UnityScheduler.UpdateScheduler);
 
 		task = new Task(() => AsyncTools.WhereAmI("5"));
-		task.RunSynchronously(); // no scheduler => use default, which is ThreadPoolScheduler 
+		task.RunSynchronously(); // no scheduler => use default, which, in this case, is ThreadPoolScheduler
 
 		task = new Task(() => AsyncTools.WhereAmI("6"));
-		task.RunSynchronously(UnityScheduler.MainThreadScheduler);
+		task.RunSynchronously(UnityScheduler.UpdateScheduler);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,18 +138,18 @@ internal class ThreadPingPong : MonoBehaviour
 		AsyncTools.WhereAmI("3");
 
 		await AsyncTools.ToUpdate();
-		AsyncTools.WhereAmI("5");
+		AsyncTools.WhereAmI("4");
 		await 0;
-		AsyncTools.WhereAmI("6");
+		AsyncTools.WhereAmI("5");
 
 		await AsyncTools.ToLateUpdate();
+		AsyncTools.WhereAmI("6");
+		await 0;
+		AsyncTools.WhereAmI("7");
+
+		await AsyncTools.ToFixedUpdate();
 		AsyncTools.WhereAmI("8");
 		await 0;
 		AsyncTools.WhereAmI("9");
-
-		await AsyncTools.ToFixedUpdate();
-		AsyncTools.WhereAmI("11");
-		await 0;
-		AsyncTools.WhereAmI("12");
 	}
 }
