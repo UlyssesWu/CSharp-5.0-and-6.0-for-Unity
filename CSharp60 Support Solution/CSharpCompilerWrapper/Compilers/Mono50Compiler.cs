@@ -13,11 +13,11 @@ internal class Mono50Compiler : Compiler
 		string processArguments;
 		if (platform == Platform.Windows)
 		{
-			processArguments = $"-sdk:2 -langversion:Future -r:\"{systemCoreDllPath}\" {responseFile}";
+			processArguments = $"-sdk:2 -debug+ -langversion:Future -r:\"{systemCoreDllPath}\" {responseFile}";
 		}
 		else
 		{
-			processArguments = $"-sdk:2 -langversion:Future {responseFile}";
+			processArguments = $"-sdk:2 -debug+ -langversion:Future {responseFile}";
 		}
 
 		var process = new Process();
