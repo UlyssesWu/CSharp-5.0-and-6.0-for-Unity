@@ -10,9 +10,9 @@ using Debug = UnityEngine.Debug;
 
 public static class AsyncTools
 {
-	private static readonly Awaiter updateAwaiter = new SynchronizationContextAwaiter(UnityScheduler.UpdateContext);
-	private static readonly Awaiter fixedAwaiter = new SynchronizationContextAwaiter(UnityScheduler.FixedUpdateContext);
-	private static readonly Awaiter lateUpdateAwaiter = new SynchronizationContextAwaiter(UnityScheduler.LateUpdateContext);
+	private static readonly Awaiter updateAwaiter = new SynchronizationContextAwaiter(UnityScheduler.UpdateScheduler.Context);
+	private static readonly Awaiter fixedAwaiter = new SynchronizationContextAwaiter(UnityScheduler.FixedUpdateScheduler.Context);
+	private static readonly Awaiter lateUpdateAwaiter = new SynchronizationContextAwaiter(UnityScheduler.LateUpdateScheduler.Context);
 	private static readonly Awaiter threadPoolAwaiter = new ThreadPoolContextAwaiter();
 	private static readonly Awaiter doNothingAwaiter = new DoNothingAwaiter();
 

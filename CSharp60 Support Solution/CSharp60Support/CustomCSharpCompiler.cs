@@ -21,13 +21,13 @@ internal class CustomCSharpCompiler : MonoCSharpCompiler
 
 	private string GetCompilerPath(List<string> arguments)
 	{
-		var compilerPath = Path.Combine(Directory.GetCurrentDirectory(), "smcs.exe");
+		var compilerPath = Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "CSharp60Support"), "CSharpCompilerWrapper.exe");
 		if (File.Exists(compilerPath))
 		{
 			return compilerPath;
 		}
 
-		Debug.LogWarning($"Custom C# compiler not found in project directory ({compilerPath}), using the default compiler");
+		Debug.LogWarning($"Alternative C# compiler not found ({compilerPath}), using the default compiler");
 
 		// calling base method via reflection
 		var bindingFlags = BindingFlags.Instance | BindingFlags.NonPublic;

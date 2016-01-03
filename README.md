@@ -8,45 +8,35 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 # Ok, what should I do? #
 
-Old way:
+1. If you run Unity 4 on Mac OS X, download and install [Mono][mono]. If you don't then don't.
 
-1. Copy `smcs.exe` from this repository to your `/Unity/Editor/Data/Mono/lib/mono/2.0` folder on Windows or `/Applications/Unity/Unity.app/Contents/Frameworks/Mono/lib/mono/2.0` on Mac OS X. Just copy, there's nothing to replace.
+2. Copy `CSharp60Support` folder from this repository to your Unity project. It should be located in the project's root, next to the `Assets` folder.
 
-2. Create a new Unity project or open an existing one. Make sure that `Project Settings`/`Player`/`API Compatibility Level` is set to `.Net 2.0`.
+3. If you use Unity 5, import `CSharp60Support/CSharp60Support for Unity 5.unitypackage` into your project.
 
-3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
+    If you use Unity 4, import `CSharp60Support/CSharp60Support for Unity 4.unitypackage` into your project.
 
-4. If you run Unity 4 on Mac OS X, download and install [Mono][mono]. 
+4. Select `Reimport All` or just restart the editor.
 
-New way:
+[Watch animated gif.](How_to_install.gif)
 
-1. Copy `Assets/Editor/CSharp60Support.dll` from this repository to any `Editor` folder inside your project (if you use Unity 4, take the one from `Assets/Editor/CSharp60Support for Unity 4.zip`).
-
-2. Copy `smcs.exe` to your project's root.
-
-3. Copy `mcs.exe` or `Roslyn` folder to your project's root.
-
-4. If you run Unity 4 on Mac OS X, download and install [Mono][mono].  
-
-That's it.
-
-The new way has one huge advantage: there's no need to modify Unity installation folder each time Unity updates.
+Thus, the project folder is the only folder that changes. All the other projects will work as usual.
 
 # How does it work? #
 
-`Assets/Editor/CSharp60Support.dll`, if exists, modifies Unity editor's internal data, telling it to use a custom C# compiler (`smcs.exe`) that should be located in the current project's root folder. If there's no `smcs.exe` in the project's root, then a stock compiler will be used.
+1. `UnityProject/Assets/CSharp 6.0 Support/Editor/CSharp60Support.dll` is an editor extension that modifies the editor's internal data via reflection, telling it to use the alternative C# compiler (``UnityProject/CSharp60Support/CSharpCompilerWrapper.exe``). If it doesn't exist, the stock compiler will be used.
 
-`smcs.exe` receives and redirects compilation requests from Unity to one of the actual C# compilers using the following rules:
+2. `CSharpCompilerWrapper.exe` receives and redirects compilation requests from Unity to one of the actual C# compilers using the following rules:
 
-1. If the current project contains `Roslyn` folder and the platform is Windows, then Roslyn C# 6.0 compiler will be used;
+    * If `CSharp60Support` folder contains `Roslyn` folder and the platform is Windows, then Roslyn C# 6.0 compiler will be used;
 
-2. else if the current project contains `mcs.exe`, then this Mono C# 6.0 compiler will be used;
+    * else if `CSharp60Support` folder contains `mcs.exe`, then this Mono C# 6.0 compiler will be used;
 
-3. else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be used (/Unity/Editor/Data/MonoBleedingEdge/lib/mono/4.5/mcs.exe);
+    * else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be used (`/Unity/Editor/Data/MonoBleedingEdge/lib/mono/4.5/mcs.exe`);
 
-4. else the stock compiler will be used (/Unity/Editor/Data/Mono/lib/mono/2.0/gmcs.exe).
-
-All this means that Unity will use the alternative compiler only in those projects, where you have explicitely expressed your wish to do so. Otherwise, it will use the stock compiler as usual.
+    * else the stock compiler will be used (`/Unity/Editor/Data/Mono/lib/mono/2.0/gmcs.exe`).
+    
+To make sure that `CSharpCompilerWrapper.exe` does actually work, check its log file: `UnityProject/CSharp60Support/compilation log.txt`
 
 # License #
 
@@ -66,7 +56,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * Using Mono C# 6.0 compiler may cause Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
 
-* IL2CPP (affects iOS and WebGL) currently fails to process exception filters (ExceptionFiltersTest.cs)
+* IL2CPP doesn't support exception filters added in C# 6.0 (ExceptionFiltersTest.cs).
 
 * There are cases when Mono compiler fails to compile fully legit C# 6.0 code:
 
@@ -87,7 +77,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.2.1.102][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
-* AsyncBridge library provides a set of types that makes it possible to use _async/await_ in projects that target CLR 2.0. For more information, check [this blog post][asyncbridge].
+* AsyncBridge library contains a set of types that makes it possible to use _async/await_ in projects that target CLR 2.0. It also provides Caller Info attributes support. For more information, check [this blog post][asyncbridge].
 
 * If you use _async/await_ inside Unity events (Awake, Start, Update etc) you may notice that continuations (the code below `await` keyword) are executed in background threads. Most likely, this is not what you would want. To force `await` to return the execution to the main thread, you'll have to provide it with a synchronization context, like all WinForms and WPF applications do.
 
