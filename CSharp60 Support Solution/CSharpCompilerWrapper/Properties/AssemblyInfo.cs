@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("smcs")]
+[assembly: AssemblyTitle("CSharpCompilerWrapper")]
 [assembly: AssemblyCompany("alexzzzz")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.5.3")]
-[assembly: AssemblyFileVersion("1.5.3")]
+[assembly: AssemblyVersion("1.6.1")]
+[assembly: AssemblyFileVersion("1.6.1")]

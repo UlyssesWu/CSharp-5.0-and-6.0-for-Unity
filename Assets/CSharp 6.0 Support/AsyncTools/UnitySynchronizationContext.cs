@@ -18,7 +18,7 @@ public class UnitySynchronizationContext : SynchronizationContext
 		queue.Add(new KeyValuePair<SendOrPostCallback, object>(d, state));
 	}
 
-	public void Run()
+	public void ExecutePendingContinuations()
 	{
 		KeyValuePair<SendOrPostCallback, object> workItem;
 		while (queue.TryTake(out workItem))
