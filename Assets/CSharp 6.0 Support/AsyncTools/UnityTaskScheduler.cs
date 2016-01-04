@@ -19,6 +19,7 @@ public class UnityTaskScheduler : TaskScheduler
 	public void Activate()
 	{
 		SynchronizationContext.SetSynchronizationContext(Context);
+		Context.Activate();
 
 		ExecutedPendingTasks();
 		Context.ExecutePendingContinuations();
