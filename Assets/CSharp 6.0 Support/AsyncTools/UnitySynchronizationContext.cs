@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
@@ -8,9 +9,17 @@ public class UnitySynchronizationContext : SynchronizationContext
 
 	public string Name { get; }
 
+	public event EventHandler Activated;
+
 	public UnitySynchronizationContext(string name)
 	{
 		Name = name;
+	}
+
+	public void Activate()
+	{
+		Activated?.Invoke(this, EventArgs.Empty);
+		Activated = null;
 	}
 
 	public override void Post(SendOrPostCallback d, object state)

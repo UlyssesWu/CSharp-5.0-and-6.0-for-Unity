@@ -124,24 +124,37 @@ public static class AsyncTools
 	}
 
 	/// <summary>
-	/// <code>
-	/// await 0.5f; // Wait for 0.5 seconds
-	/// await 0f; // If called from the main thread effectively means "wait until the next frame".
-	/// </code>
+	/// Waits for specified number of seconds or until next frame.
+	/// 
+	/// If the argument is zero or negative, and if called from the main thread from Update or LateUpdate context,
+	/// waits until next rendering frame.
+	/// 
+	/// If the argument is zero or negative, and if called from the main thread from FixedUpdate context,
+	/// waits until next physics frame.
 	/// </summary>
-	public static TaskAwaiter GetAwaiter(this float seconds)
+	/// <param name="seconds">If positive, number of seconds to wait</param>
+	public static Awaiter GetAwaiter(this float seconds)
 	{
-		seconds = Math.Max(seconds, .001f); // makes 'await 0f' an equivalent of Unity's 'yield return null'
-		return TaskEx.Delay((int)(seconds * 1000)).GetAwaiter();
+		var context = SynchronizationContext.Current as UnitySynchronizationContext;
+		if (seconds <= 0f && context != null)
+		{
+			return new ContextActivationAwaiter(context);
+		}
+
+		return new DelayAwaiter(seconds);
 	}
 
 	/// <summary>
-	/// <code>
-	/// await 10; // Wait for 10 seconds
-	/// await 0; // If called from the main thread effectively means "wait until the next frame".
-	/// </code>
+	/// Waits for specified number of seconds or until next frame.
+	/// 
+	/// If the argument is zero or negative, and if called from the main thread from Update or LateUpdate context,
+	/// waits until next rendering frame.
+	/// 
+	/// If the argument is zero or negative, and if called from the main thread from FixedUpdate context,
+	/// waits until next physics frame.
 	/// </summary>
-	public static TaskAwaiter GetAwaiter(this int seconds) => GetAwaiter((float)seconds);
+	/// <param name="seconds">If positive, number of seconds to wait</param>
+	public static Awaiter GetAwaiter(this int seconds) => GetAwaiter((float)seconds);
 
 	/// <summary>
 	/// Waits until all the tasks are completed.
@@ -163,14 +176,68 @@ public static class AsyncTools
 		return tcs.Task.GetAwaiter();
 	}
 
-	#region Context switching awaiter classes
+	#region Different awaiters
 
 	public abstract class Awaiter : INotifyCompletion
 	{
 		public abstract bool IsCompleted { get; }
-		public abstract void OnCompleted(Action continuation);
+		public abstract void OnCompleted(Action action);
 		public Awaiter GetAwaiter() => this;
 		public void GetResult() { }
+	}
+
+	private class DelayAwaiter : Awaiter
+	{
+		private readonly SynchronizationContext context;
+		private readonly float seconds;
+
+		public DelayAwaiter(float seconds)
+		{
+			context = SynchronizationContext.Current;
+			this.seconds = seconds;
+		}
+
+		public override bool IsCompleted => (seconds <= 0f);
+
+		public override void OnCompleted(Action action)
+		{
+			TaskEx.Delay((int)(seconds * 1000)).ContinueWith(prevTask =>
+															 {
+																 if (context != null)
+																 {
+																	 context.Post(state => action(), null);
+																 }
+																 else
+																 {
+																	 action();
+																 }
+															 });
+		}
+	}
+
+	private class ContextActivationAwaiter : Awaiter
+	{
+		private readonly UnitySynchronizationContext context;
+		private Action continuation;
+
+		public ContextActivationAwaiter(UnitySynchronizationContext context)
+		{
+			this.context = context;
+		}
+
+		public override bool IsCompleted => false;
+
+		public override void OnCompleted(Action action)
+		{
+			continuation = action;
+			context.Activated += ContextActivationEventHandler;
+		}
+
+		private void ContextActivationEventHandler(object sender, EventArgs eventArgs)
+		{
+			context.Activated -= ContextActivationEventHandler;
+			context.Post(state => continuation(), null);
+		}
 	}
 
 	private class DoNothingAwaiter : Awaiter
