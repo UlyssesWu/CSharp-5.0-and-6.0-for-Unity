@@ -14,7 +14,6 @@ public static class AsyncTools
 	private static readonly Awaiter fixedAwaiter = new SynchronizationContextAwaiter(UnityScheduler.FixedUpdateScheduler.Context);
 	private static readonly Awaiter lateUpdateAwaiter = new SynchronizationContextAwaiter(UnityScheduler.LateUpdateScheduler.Context);
 	private static readonly Awaiter threadPoolAwaiter = new ThreadPoolContextAwaiter();
-	private static readonly Awaiter doNothingAwaiter = new DoNothingAwaiter();
 
 	public static void WhereAmI(string text)
 	{
@@ -36,56 +35,27 @@ public static class AsyncTools
 
 	/// <summary>
 	/// Switches execution to a background thread.
-	/// <code>
-	/// 
-	/// // stuff to do in the main thread
-	/// await AsyncTools.ToThreadPool();
-	/// // stuff to do in a background thead
-	/// </code>
 	/// </summary>
-	public static Awaiter ToThreadPool()
-	{
-		return IsMainThread() ? threadPoolAwaiter : doNothingAwaiter;
-	}
+	public static Awaiter ToThreadPool() => threadPoolAwaiter;
 
 	/// <summary>
 	/// Switches execution to the Update context of the main thread.
-	/// <code>
-	/// 
-	/// await AsyncTools.ToMainThread();
-	/// // stuff to do in the main thread
-	/// </code>
 	/// </summary>
 	[Obsolete("Use ToUpdate(), ToLateUpdate() or ToFixedUpdate() instead.")]
 	public static Awaiter ToMainThread() => updateAwaiter;
 
 	/// <summary>
 	/// Switches execution to the Update context of the main thread.
-	/// <code>
-	/// 
-	/// await AsyncTools.ToUpdate();
-	/// // stuff to do in the Update context of the main thread
-	/// </code>
 	/// </summary>
 	public static Awaiter ToUpdate() => updateAwaiter;
 
 	/// <summary>
 	/// Switches execution to the LateUpdate context of the main thread.
-	/// <code>
-	/// 
-	/// await AsyncTools.ToLateUpdate();
-	/// // stuff to do in the LateUpdate context of the main thread
-	/// </code>
 	/// </summary>
 	public static Awaiter ToLateUpdate() => lateUpdateAwaiter;
 
 	/// <summary>
 	/// Switches execution to the FixedUpdate context of the main thread.
-	/// <code>
-	/// 
-	/// await AsyncTools.ToFixedUpdate();
-	/// // stuff to do in the FixedUpdate context of the main thread
-	/// </code>
 	/// </summary>
 	public static Awaiter ToFixedUpdate() => fixedAwaiter;
 
@@ -240,12 +210,6 @@ public static class AsyncTools
 		}
 	}
 
-	private class DoNothingAwaiter : Awaiter
-	{
-		public override bool IsCompleted => true;
-		public override void OnCompleted(Action action) => action();
-	}
-
 	private class SynchronizationContextAwaiter : Awaiter
 	{
 		private readonly UnitySynchronizationContext context;
@@ -255,7 +219,8 @@ public static class AsyncTools
 			this.context = context;
 		}
 
-		public override bool IsCompleted => false;
+		public override bool IsCompleted => (SynchronizationContext.Current == context);
+
 		public override void OnCompleted(Action action) => context.Post(state => action(), null);
 	}
 
