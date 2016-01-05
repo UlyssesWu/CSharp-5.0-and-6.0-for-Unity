@@ -61,6 +61,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 * If a MonoBehaviour is declared inside a namespace, the source file should not contain any C# 6.0-specific language construction before the MonoBehaviour declaration. Otherwise, Unity won't recognize the script as a MonoBehaviour component.
 
     Bad example:
+
         using UnityEngine;
         using static System.Math; // C# 6.0 syntax!
 
@@ -75,6 +76,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
         	class Bar : MonoBehaviour { } // "No MonoBehaviour scripts in the file, or their names do not match the file name."
         }
     Good example:        
+
         using UnityEngine;
 
         namespace Foo
