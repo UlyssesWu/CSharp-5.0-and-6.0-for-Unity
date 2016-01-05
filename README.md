@@ -6,6 +6,7 @@ Unity has been stuck with CLR 2.0 for a very long time, but almost all the lates
 
 Late binding (`dynamic`) feature that came with C# 4.0 still won't be available in Unity, because it relies on CLR 4.0 that we don't have yet.
 
+
 # Ok, what should I do? #
 
 1. If you run Unity 4 on Mac OS X, download and install [Mono][mono]. If you don't then don't.
@@ -18,9 +19,10 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 4. Select `Reimport All` or just restart the editor.
 
-[Watch animated gif.](How_to_install.gif)
+[Watch a demo](How_to_install.gif)
 
 Thus, the project folder is the only folder that changes. All the other projects will work as usual.
+
 
 # How does it work? #
 
@@ -38,27 +40,35 @@ Thus, the project folder is the only folder that changes. All the other projects
     
 To make sure that `CSharpCompilerWrapper.exe` does actually work, check its log file: `UnityProject/CSharp60Support/compilation log.txt`
 
+
 # License #
 
-The source code is released under [WTFPL version 2](http://www.wtfpl.net/about/).
+All the source code is published under [WTFPL version 2](http://www.wtfpl.net/about/).
 
-# Want to talk about it? #
 
-http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
+# What platforms are "supported"? #
 
-# Known issues #
+This hack seems to work on the major platforms:
+* Windows (editor and standalone)
+* Mac OS X (editor and standalone)
+* Android
+* iOS
+
+Since WebGL doesn't offer any multithreading support, AsyncBridge and Task Parallel Library are not available for this platform. Caller Info attributes are also not available, because their support comes with AsyncBridge library.
+
+AsyncBridge stuff is also not compatible with Windows Store Application platform (and probably all the platforms that use .Net runtime instead of Mono runtime) due to API differences between the recent versions of .Net Framework and the ancient version of System.Threading.dll that comes with AsyncBridge. Namely, you can't use async/await, Caller Info attributes and everything from System.Threading.dll (concurrent collections for example).
+
+WebPlayer platform is not supported and most likely will never be since it is about to be deprecated.
+
+# Other known issues #
 
 * C# 5.0/6.0 is not compatible with Unity Cloud Build service for obvious reason.
 
-* WebPlayer platform is not supported. No serious problems, it just requires some additional effort.
-
-* AsyncBrigde stuff is not compatible with Windows Store Application platform due to API differences between the recent versions of .Net Framework and the ancient version of System.Threading.dll that comes with AsyncBridge. Namely, you can't use async/await, caller information attributes and everything from System.Threading.dll (concurrent collections for example).
-
-* Using Mono C# 6.0 compiler may cause Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
+* Using Mono C# 6.0 compiler may cause occasional Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
 
 * IL2CPP doesn't support exception filters added in C# 6.0 (ExceptionFiltersTest.cs).
 
-* If a MonoBehaviour is declared inside a namespace, the source file should not contain any C# 6.0-specific language construction before the MonoBehaviour declaration. Otherwise, Unity won't recognize the script as a MonoBehaviour component.
+* If a MonoBehaviour is declared inside a namespace, the source file should not contain any C# 6.0-specific language constructions before the MonoBehaviour declaration. Otherwise, Unity won't recognize the script as a MonoBehaviour component.
 
     Bad example:
 
@@ -101,7 +111,13 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
             // assembly reference?
 
         Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
-    
+
+
+# Want to talk about it? #
+
+http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
+
+   
 # Random notes #
 
 * Roslyn compiler was taken from VS 2015 installation.
@@ -115,6 +131,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
     Check `UnityScheduler.cs` example implementation located inside the project or just put `UnityScheduler` prefab in your first scene. The script creates and registers a synchronization context for the Unity's main thread, so async/await could work the way they do in regular WinForms or WPF applications.
 
     For more information about what synchronization context is, what it is for and how to use it, see this set of articles by Stephen Toub: [one][synccontext1], [two][synccontext2], [three][synccontext3].
+
 
 [mono]: http://www.mono-project.com/download/
 [roslyn]: https://github.com/dotnet/roslyn
