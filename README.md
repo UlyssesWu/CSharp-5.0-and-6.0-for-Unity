@@ -58,9 +58,38 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * IL2CPP doesn't support exception filters added in C# 6.0 (ExceptionFiltersTest.cs).
 
-* There are cases when Mono compiler fails to compile fully legit C# 6.0 code:
+* If a MonoBehaviour is declared inside a namespace, the source file should not contain any C# 6.0-specific language construction before the MonoBehaviour declaration. Otherwise, Unity won't recognize the script as a MonoBehaviour component.
 
-    * Null-conditional operator *(NullConditionalTest.cs)*
+    Bad example:
+        using UnityEngine;
+        using static System.Math; // C# 6.0 syntax!
+
+        namespace Foo
+        {
+	       class Baz
+	       {
+		      object Qux1 => null; // C# 6.0 syntax!
+		      object Qux2 { get; } = null; // C# 6.0 syntax!
+	       }
+
+        	class Bar : MonoBehaviour { } // "No MonoBehaviour scripts in the file, or their names do not match the file name."
+        }
+    Good example:        
+        using UnityEngine;
+
+        namespace Foo
+        {
+	       class Bar : MonoBehaviour { } // ok
+
+        	class Baz
+	       {
+		      object Qux1 => null;
+		      object Qux2 { get; } = null;
+	       }
+        }
+
+
+* There's a bug in Mono C# 6.0 compiler, related to null-conditional operator support (NullConditionalTest.cs):
 
             var foo = new[] { 1, 2, 3 };
             var bar = foo?[0];
