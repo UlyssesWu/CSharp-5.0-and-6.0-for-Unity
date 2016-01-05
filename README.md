@@ -49,6 +49,7 @@ All the source code is published under [WTFPL version 2](http://www.wtfpl.net/ab
 # What platforms are "supported"? #
 
 This hack seems to work on the major platforms:
+
 * Windows (editor and standalone)
 * Mac OS X (editor and standalone)
 * Android
