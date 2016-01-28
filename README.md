@@ -57,7 +57,7 @@ This hack seems to work on the major platforms:
 
 Since WebGL doesn't offer any multithreading support, AsyncBridge and Task Parallel Library are not available for this platform. Caller Info attributes are also not available, because their support comes with AsyncBridge library.
 
-AsyncBridge stuff is also not compatible with Windows Store Application platform (and probably all the platforms that use .Net runtime instead of Mono runtime) due to API differences between the recent versions of .Net Framework and the ancient version of System.Threading.dll that comes with AsyncBridge. Namely, you can't use async/await, Caller Info attributes and everything from System.Threading.dll (concurrent collections for example).
+AsyncBridge/TPL stuff is also not compatible with Windows Store Application platform (and probably all the platforms that use .Net runtime instead of Mono runtime) due to API differences between the recent versions of .Net Framework and the ancient version of TPL (System.Threading.dll) that comes with AsyncBridge. Namely, you can't use async/await, Caller Info attributes and everything from System.Threading.dll (concurrent collections for example).
 
 WebPlayer platform is not supported and most likely will never be since it is about to be deprecated.
 
@@ -69,7 +69,7 @@ WebPlayer platform is not supported and most likely will never be since it is ab
 
 * IL2CPP doesn't support exception filters added in C# 6.0 (ExceptionFiltersTest.cs).
 
-* If a MonoBehaviour is declared inside a namespace, the source file should not contain any C# 6.0-specific language constructions before the MonoBehaviour declaration. Otherwise, Unity won't recognize the script as a MonoBehaviour component.
+* If a MonoBehaviour is declared inside a namespace, the source file should not contain any C# 6.0-specific language constructions before the MonoBehaviour declaration. Otherwise, the editor won't recognize the script as a MonoBehaviour component.
 
     Bad example:
 
@@ -94,7 +94,7 @@ WebPlayer platform is not supported and most likely will never be since it is ab
         {
 	       class Bar : MonoBehaviour { } // ok
 
-        	class Baz
+	       class Baz
 	       {
 		      object Qux1 => null;
 		      object Qux2 { get; } = null;
@@ -104,14 +104,14 @@ WebPlayer platform is not supported and most likely will never be since it is ab
 
 * There's a bug in Mono C# 6.0 compiler, related to null-conditional operator support (NullConditionalTest.cs):
 
-            var foo = new[] { 1, 2, 3 };
-            var bar = foo?[0];
-            Debug.Log((foo?[0]).HasValue); // error CS1061: Type `int' does not 
-            // contain a definition for `HasValue' and no extension method
-            // `HasValue' of type `int' could be found. Are you missing an
-            // assembly reference?
+        var foo = new[] { 1, 2, 3 };
+        var bar = foo?[0];
+        Debug.Log((foo?[0]).HasValue); // error CS1061: Type `int' does not 
+        // contain a definition for `HasValue' and no extension method
+        // `HasValue' of type `int' could be found. Are you missing an
+        // assembly reference?
 
-        Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
+    Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
 
 
 # Want to talk about it? #
