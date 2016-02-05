@@ -19,7 +19,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 4. Select `Reimport All` or just restart the editor.
 
-5. You might also need to delete the existing .csproj files and let Unity to recreate them from scratch. If they were created after Visual Studio Tools for Unity version 2.2 (or later) had been installed, they may contain a restriction to use C# version 4.0 instead of the latest version of the language.
+5. You might also need to delete the existing .csproj files and let Unity to recreate them from scratch. If they were created after Visual Studio Tools for Unity version 2.2 (or later) had been installed, they may contain a restriction to use C# version 4.0 instead of the latest version of the language. This restriction doesn't affect compilation in Unity but makes Visual Studio highlight half you your code in red.
 
 [Watch a demo](How_to_install.gif)
 
