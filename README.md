@@ -19,6 +19,8 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 4. Select `Reimport All` or just restart the editor.
 
+5. You might also need to delete the existing .csproj files and let Unity to recreate them from scratch. If they were created after Visual Studio Tools for Unity version 2.2 (or later) had been installed, they may contain a restriction to use C# version 4.0 instead of the latest version of the language.
+
 [Watch a demo](How_to_install.gif)
 
 Thus, the project folder is the only folder that changes. All the other projects will work as usual.
