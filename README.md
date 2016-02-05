@@ -19,7 +19,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 4. Select `Reimport All` or just restart the editor.
 
-5. You might also need to delete the existing .csproj files and let Unity to recreate them from scratch. If they were created after Visual Studio Tools for Unity version 2.2 (or later) had been installed, they may contain a restriction to use C# version 4.0 instead of the latest version of the language. This restriction doesn't affect compilation in Unity but makes Visual Studio highlight half you your code in red.
+5. If you use Visual Studio Tools for Unity 2.2 or later, you might also need to delete the existing .csproj files and let Unity to recreate them from scratch. See 'Other known issues' section for the details.
 
 [Watch a demo](How_to_install.gif)
 
@@ -66,6 +66,10 @@ WebPlayer platform is not supported and most likely will never be since it is ab
 # Other known issues #
 
 * C# 5.0/6.0 is not compatible with Unity Cloud Build service for obvious reason.
+
+* Visual Studio Tools for Unity starting from v2.2 restricts C# language version to 4.0 inside Visual Studio project files (*.csproj) and [doesn't let you open Project Properties window](http://forum.unity3d.com/threads/visual-studio-tools-for-unity-2-2.384014/#post-2498322) to revert this setting back to default. This restriction doesn't affect compilation in Unity but makes Visual Studio highlight half of your C# 6.0 code in red.
+
+    Solution: After you've added C# 6.0 support to a project, delete the existing .csproj files if there are any and let Unity regenerate them. The new files won't have that language version restriction.
 
 * Using Mono C# 6.0 compiler may cause occasional Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
 
