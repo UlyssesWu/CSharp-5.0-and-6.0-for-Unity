@@ -13,9 +13,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 2. Copy `CSharp60Support` folder from this repository to your Unity project. It should be located in the project's root, next to the `Assets` folder.
 
-3. If you use Unity 5, import `CSharp60Support/CSharp60Support for Unity 5.unitypackage` into your project.
-
-    If you use Unity 4, import `CSharp60Support/CSharp60Support for Unity 4.unitypackage` into your project.
+3. Import [CSharp60Support for Unity X.unitypackage](https://bitbucket.org/alexzzzz/unity-c-5.0-and-6.0-integration/downloads) into your project.
 
 4. Select `Reimport All` or just restart the editor.
 
