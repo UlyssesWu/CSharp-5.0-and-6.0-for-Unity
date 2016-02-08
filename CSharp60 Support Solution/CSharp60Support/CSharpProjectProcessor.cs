@@ -11,16 +11,16 @@ public class CSharpProjectProcessor : AssetPostprocessor
 
 		foreach (var file in projectFiles)
 		{
-			UpdateProjectFile(file);
+			RemoveLanguageVersionRestriction(file);
 		}
 
 		return false;
 	}
 
-	private static void UpdateProjectFile(string file)
+	private static void RemoveLanguageVersionRestriction(string projectFile)
 	{
-		var lines = File.ReadAllLines(file);
+		var lines = File.ReadAllLines(projectFile);
 		lines = lines.Where(line => line.Contains("LangVersion") == false).ToArray();
-		File.WriteAllLines(file, lines);
+		File.WriteAllLines(projectFile, lines);
 	}
 }
