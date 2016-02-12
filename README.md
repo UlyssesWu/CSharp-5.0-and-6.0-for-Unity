@@ -11,11 +11,11 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 1. If you run Unity 4 on Mac OS X, download and install [Mono][mono]. If you don't then don't.
 
-2. Copy `CSharp60Support` folder from this repository to your Unity project. It should be located in the project's root, next to the `Assets` folder.
+2. Copy `CSharp60Support` folder from this repository (or the [downloads page](https://bitbucket.org/alexzzzz/unity-c-5.0-and-6.0-integration/downloads)) to your Unity project. It should be placed in the project's root, next to the `Assets` folder.
 
-3. Import [CSharp60Support for Unity X.unitypackage](https://bitbucket.org/alexzzzz/unity-c-5.0-and-6.0-integration/downloads) into your project.
+3. Import `CSharp60Support for Unity X.unitypackage` into your project. It's located inside `CSharp60Support` folder.
 
-4. Select `Reimport All` or just restart the editor.
+4. Select `Reimport All` or just restart the editor, whatever is faster in your case.
 
 5. If you use Visual Studio Tools for Unity 2.2 or later, you might also need to delete the existing .csproj files and let Unity to recreate them from scratch. See 'Other known issues' section for the details.
 
