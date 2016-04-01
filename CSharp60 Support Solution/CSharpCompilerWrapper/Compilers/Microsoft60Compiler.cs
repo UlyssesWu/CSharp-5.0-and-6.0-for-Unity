@@ -21,7 +21,7 @@ internal class Microsoft60Compiler : Compiler
 		var systemXmlDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Xml.dll");
 		var mscorlibDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
 
-		string processArguments = "-nostdlib+ -noconfig "
+		string processArguments = "-nostdlib+ -noconfig -nologo "
 								  + $"-r:\"{mscorlibDllPath}\" "
 								  + $"-r:\"{systemDllPath}\" "
 								  + $"-r:\"{systemCoreDllPath}\" "
@@ -55,14 +55,10 @@ internal class Microsoft60Compiler : Compiler
 	public override void PrintCompilerOutputAndErrors()
 	{
 		// Microsoft's compiler writes all warnings and errors to the standard output channel,
-		// so move them to the error channel skipping first 3 lines that are just part of the header.
+		// so move them to the error channel
 
-		while (outputLines.Count > 3)
-		{
-			var line = outputLines[3];
-			outputLines.RemoveAt(3);
-			errorLines.Add(line);
-		}
+		errorLines.AddRange(outputLines);
+		outputLines.Clear();
 
 		base.PrintCompilerOutputAndErrors();
 	}
