@@ -75,6 +75,8 @@
     <Content Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="UnityEditor">
       <HintPath>H:\Program Files\Unity\Editor\Data\Managed\UnityEditor.dll</HintPath>
       <Private>False</Private>

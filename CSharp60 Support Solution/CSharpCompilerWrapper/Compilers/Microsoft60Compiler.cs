@@ -22,7 +22,8 @@ internal class Microsoft60Compiler : Compiler
 		var mscorlibDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
 
 		string processArguments = "-nostdlib+ -noconfig -nologo "
-								  + $"-r:\"{mscorlibDllPath}\" "
+								  + "/features:refLocalsAndReturns,patterns,localFunctions,binaryLiterals,digitSeparators,patternsExperimental "
+                                  + $"-r:\"{mscorlibDllPath}\" "
 								  + $"-r:\"{systemDllPath}\" "
 								  + $"-r:\"{systemCoreDllPath}\" "
 								  + $"-r:\"{systemXmlDllPath}\" " + responseFile;
