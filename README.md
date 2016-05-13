@@ -19,7 +19,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 5. If you use Visual Studio Tools for Unity 2.2, you might also need to delete the existing .csproj files and let Unity to recreate them from scratch. See 'Other known issues' section for the details.
 
-6. [Optional] If you use Windows, run `/CSharp60Support/ngen install.cmd` once <u>with administrator privileges</u>. It will precompile csc.exe, pdb2mdb.exe and mcs.exe using [Ngen][ngen] and that will make compilation in Unity a bit faster.
+6. [Optional] If you use Windows, run `/CSharp60Support/ngen install.cmd` once *with administrator privileges*. It will precompile csc.exe, pdb2mdb.exe and mcs.exe using [Ngen][ngen] that will make compilation in Unity a bit faster.
 
 [Watch a demo](How_to_install.gif)
 
