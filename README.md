@@ -19,6 +19,8 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 5. If you use Visual Studio Tools for Unity 2.2 or later, you might also need to delete the existing .csproj files and let Unity to recreate them from scratch. See 'Other known issues' section for the details.
 
+6. [Optional] If you use Windows, run `/CSharp60Support/ngen install.cmd` once <u>with administrator privileges</u>. It will precompile csc.exe, pdb2mdb.exe and mcs.exe using [Ngen][ngen] and that will make compilation in Unity a bit faster.
+
 [Watch a demo](How_to_install.gif)
 
 Thus, the project folder is the only folder that changes. All the other projects will work as usual.
@@ -26,7 +28,7 @@ Thus, the project folder is the only folder that changes. All the other projects
 
 # How does it work? #
 
-1. `UnityProject/Assets/CSharp 6.0 Support/Editor/CSharp60Support.dll` is an editor extension that modifies the editor's internal data via reflection, telling it to use the alternative C# compiler (``UnityProject/CSharp60Support/CSharpCompilerWrapper.exe``). If it doesn't exist, the stock compiler will be used.
+1. `/Assets/CSharp 6.0 Support/Editor/CSharp60Support.dll` is an editor extension that modifies the editor's internal data via reflection, telling it to use the alternative C# compiler (`/CSharp60Support/CSharpCompilerWrapper.exe`). If it doesn't exist, the stock compiler will be used.
 
 2. `CSharpCompilerWrapper.exe` receives and redirects compilation requests from Unity to one of the actual C# compilers using the following rules:
 
@@ -144,3 +146,4 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 [synccontext1]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/20/10259049.aspx
 [synccontext2]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/21/10259307.aspx
 [synccontext3]: http://blogs.msdn.com/b/pfxteam/archive/2012/02/02/await-synchronizationcontext-and-console-apps-part-3.aspx
+[ngen]: https://msdn.microsoft.com/en-us/library/6t9t5wcf%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
