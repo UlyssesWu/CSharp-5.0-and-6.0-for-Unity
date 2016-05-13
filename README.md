@@ -70,8 +70,11 @@ WebPlayer platform is not supported and most likely will never be since it is ab
 * Visual Studio Tools for Unity starting from v2.2 restricts C# language version to 4.0 inside Visual Studio project files (*.csproj) and [doesn't let you open Project Properties window](http://forum.unity3d.com/threads/visual-studio-tools-for-unity-2-2.384014/#post-2498322) to revert this setting back to default. This restriction doesn't affect compilation in Unity but makes Visual Studio highlight half of your C# 6.0 code in red.
 
     After you've added C# 6.0 support to a project, delete the existing .csproj files if there are any and let Unity regenerate them. The new files shouldn't have that language version restriction. However, it's not 100% reliable and the restriction may come back. At the moment, the possible solutions are:
+    
     * Click "Open C# Project" in Unity's menu. It will regenerate .csproj files once more.
+    
     * Place [this editor script][vstu_script] to any Editor folder inside your project. NB: If you later uninstall VSTU for any reason, this scripts will generate errors since SyntaxTree.VisualStudio.Unity.Bridge won't be longer available.
+    
     * Use [VSTU 2.1][vstu_21] until some future version makes C# 4.0 restriction optional.
 
 
