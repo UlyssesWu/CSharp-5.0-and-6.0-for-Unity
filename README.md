@@ -17,9 +17,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 4. Select `Reimport All` or just restart the editor, whatever is faster in your case.
 
-5. If you use Visual Studio Tools for Unity 2.2, you might also need to delete the existing .csproj files and let Unity to recreate them from scratch. See 'Other known issues' section for the details.
-
-6. [Optional] If you use Windows, run `/CSharp60Support/ngen install.cmd` once *with administrator privileges*. It will precompile csc.exe, pdb2mdb.exe and mcs.exe using [Ngen][ngen] that will make compilation in Unity a bit faster.
+5. [Optional] If you use Windows, run `/CSharp60Support/ngen install.cmd` once *with administrator privileges*. It will precompile csc.exe, pdb2mdb.exe and mcs.exe using [Ngen][ngen] that will make compilation in Unity a bit faster.
 
 [Watch a demo](How_to_install.gif)
 
@@ -66,17 +64,6 @@ WebPlayer platform is not supported and most likely will never be since it is ab
 # Other known issues #
 
 * C# 5.0/6.0 is not compatible with Unity Cloud Build service for obvious reason.
-
-* Visual Studio Tools for Unity starting from v2.2 restricts C# language version to 4.0 inside Visual Studio project files (*.csproj) and [doesn't let you open Project Properties window](http://forum.unity3d.com/threads/visual-studio-tools-for-unity-2-2.384014/#post-2498322) to revert this setting back to default. This restriction doesn't affect compilation in Unity but makes Visual Studio highlight half of your C# 6.0 code in red.
-
-    After you've added C# 6.0 support to a project, delete the existing .csproj files if there are any and let Unity regenerate them. The new files shouldn't have that language version restriction. However, it's not 100% reliable and the restriction may come back. At the moment, the possible solutions are:
-    
-    * Click "Open C# Project" in Unity's menu. It will regenerate .csproj files once more.
-    
-    * Place [this editor script][vstu_script] to any Editor folder inside your project. NB: If you later uninstall VSTU for any reason, this scripts will generate errors since SyntaxTree.VisualStudio.Unity.Bridge won't be longer available.
-    
-    * Use [VSTU 2.1][vstu_21] until some future version makes C# 4.0 restriction optional.
-
 
 * Using Mono C# 6.0 compiler may cause occasional Unity crashes while debugging in Visual Studio - http://forum.unity3d.com/threads/c-6-0.314297/page-2#post-2225696
 
@@ -154,5 +141,3 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 [synccontext2]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/21/10259307.aspx
 [synccontext3]: http://blogs.msdn.com/b/pfxteam/archive/2012/02/02/await-synchronizationcontext-and-console-apps-part-3.aspx
 [ngen]: https://msdn.microsoft.com/en-us/library/6t9t5wcf%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
-[vstu_script]: https://gist.github.com/sailro/3548b751faf821dbef7c
-[vstu_21]: https://dl.dropboxusercontent.com/u/102171874/vstu.msi
