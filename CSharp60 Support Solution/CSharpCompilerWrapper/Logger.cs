@@ -32,7 +32,7 @@ internal class Logger : IDisposable
 
 	public Logger()
 	{
-		mutex = new Mutex(true, "smcs");
+		mutex = new Mutex(true, "CSharpCompilerWrapper");
 
 		if (mutex.WaitOne(0)) // check if no other process is owning the mutex
 		{
