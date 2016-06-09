@@ -16,31 +16,34 @@ public static class CSharpProjectPostprocessor
 			}
 
 			var projectFilesGeneratorType = assembly.GetType("SyntaxTree.VisualStudio.Unity.Bridge.ProjectFilesGenerator");
-			if (projectFilesGeneratorType != null)
+			if (projectFilesGeneratorType == null)
 			{
-				var delegateType = assembly.GetType("SyntaxTree.VisualStudio.Unity.Bridge.FileGenerationHandler");
-				if (delegateType == null)
-				{
-					Debug.Log("Type 'SyntaxTree.VisualStudio.Unity.Bridge.FileGenerationHandler' not found");
-					return;
-				}
-
-				var projectFileGenerationField = projectFilesGeneratorType.GetField("ProjectFileGeneration", BindingFlags.Static | BindingFlags.Public);
-				if (projectFileGenerationField == null)
-				{
-					Debug.Log("Field 'ProjectFileGeneration' not found");
-					return;
-				}
-
-				var methodInfo = typeof(CSharpProjectPostprocessor).GetMethod(nameof(RemoveLanguageVersionRestriction), BindingFlags.Static | BindingFlags.NonPublic);
-				var postprocessHandler = Delegate.CreateDelegate(delegateType, null, methodInfo);
-
-				var delegateValue = (Delegate)projectFileGenerationField.GetValue(null);
-				delegateValue = delegateValue == null ? postprocessHandler : Delegate.Combine(delegateValue, postprocessHandler);
-				projectFileGenerationField.SetValue(null, delegateValue);
-
+				Debug.Log("Type 'SyntaxTree.VisualStudio.Unity.Bridge.ProjectFilesGenerator' not found");
 				return;
 			}
+
+			var delegateType = assembly.GetType("SyntaxTree.VisualStudio.Unity.Bridge.FileGenerationHandler");
+			if (delegateType == null)
+			{
+				Debug.Log("Type 'SyntaxTree.VisualStudio.Unity.Bridge.FileGenerationHandler' not found");
+				return;
+			}
+
+			var projectFileGenerationField = projectFilesGeneratorType.GetField("ProjectFileGeneration", BindingFlags.Static | BindingFlags.Public);
+			if (projectFileGenerationField == null)
+			{
+				Debug.Log("Field 'ProjectFileGeneration' not found");
+				return;
+			}
+
+			var handlerMethodInfo = typeof(CSharpProjectPostprocessor).GetMethod(nameof(RemoveLanguageVersionRestriction), BindingFlags.Static | BindingFlags.NonPublic);
+			var handlerDelegate = Delegate.CreateDelegate(delegateType, null, handlerMethodInfo);
+
+			var delegateValue = (Delegate)projectFileGenerationField.GetValue(null);
+			delegateValue = delegateValue == null ? handlerDelegate : Delegate.Combine(delegateValue, handlerDelegate);
+			projectFileGenerationField.SetValue(null, delegateValue);
+
+			return;
 		}
 	}
 
