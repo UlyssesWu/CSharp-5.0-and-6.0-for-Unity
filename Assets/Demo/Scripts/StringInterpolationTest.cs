@@ -13,9 +13,10 @@ internal class StringInterpolationTest : MonoBehaviour
 
         var id = 100;
         var name = "%Alice&";
-        string url = Url($"http://foobar/item/{id}/{name}");
-        Debug.Log(url);
-    }
+	    string url = null; // if 'url' is not initialized here ...
+		Url($"http://foobar/item/{id}/{name}");
+        Debug.Log(url); // ... Mono C# compiler version 4.2.3.0 reports the error CS0165: Use of unassigned local variable `url'
+	}
 
     private static string Url(FormattableString formattable)
     {
