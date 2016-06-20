@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 internal class Mono60Compiler : Compiler
 {
@@ -22,9 +23,30 @@ internal class Mono60Compiler : Compiler
 			processArguments = $"-sdk:2 -debug+ -langversion:Default {responseFile}";
 		}
 
+		FixTvosIosIssue(responseFile.TrimStart('@'));
+
 		var process = new Process();
 		process.StartInfo = CreateOSDependentStartInfo(platform, ProcessRuntime.CLR40, compilerPath, processArguments, unityEditorDataDir);
 		return process;
+	}
+
+	private void FixTvosIosIssue(string responseFile)
+	{
+		var lines = File.ReadAllLines(responseFile).Select(line => line.Replace('\\', '/')).ToList();
+
+		var definedTVOS = lines.Contains("-define:UNITY_TVOS");
+		if (definedTVOS == false)
+		{
+			lines.RemoveAll(line => line.Contains("/PlaybackEngines/AppleTVSupport/UnityEditor.iOS.Extensions."));
+		}
+
+		var definedIOS = lines.Contains("-define:UNITY_IOS");
+		if (definedIOS == false)
+		{
+			lines.RemoveAll(line => line.Contains("/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions."));
+		}
+
+		File.WriteAllLines(responseFile, lines.ToArray());
 	}
 
 	public static bool IsAvailable(string directory) => File.Exists(Path.Combine(directory, "mcs.exe"));
