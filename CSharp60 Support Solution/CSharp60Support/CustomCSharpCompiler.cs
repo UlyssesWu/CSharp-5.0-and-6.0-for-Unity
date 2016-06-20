@@ -57,29 +57,12 @@ internal class CustomCSharpCompiler : MonoCSharpCompiler
 					   "-nowarn:0169",
 					   "-out:" + PrepareFileName(_island._output)
 				   };
-		var defines = _island._defines.Distinct();
-
-		var definedIOS = defines.Contains("UNITY_IOS");
-		var definedTVOS = defines.Contains("UNITY_TVOS");
-
 		foreach (var reference in _island._references)
 		{
-			var containsAppleTvSupport = reference.Contains("AppleTVSupport");
-			bool containsIOSSupport = reference.Contains("iOSSupport");
-
-			if (containsIOSSupport && definedIOS == false)
-			{
-				continue;
-			}
-			if (containsAppleTvSupport && definedTVOS == false)
-			{
-				continue;
-			}
-
 			arguments.Add("-r:" + PrepareFileName(reference));
 		}
 
-		foreach (var define in defines)
+		foreach (var define in _island._defines.Distinct())
 		{
 			arguments.Add("-define:" + define);
 		}
