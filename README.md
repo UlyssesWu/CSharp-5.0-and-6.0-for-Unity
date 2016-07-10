@@ -4,7 +4,7 @@ Yes, you can.
 
 Unity has been stuck with CLR 2.0 for a very long time, but almost all the latest C# features do not require the latest versions of CLR. Microsoft and Mono compilers can compile C# 6.0 code for CLR 2.0 if you explicitly ask them to do so.
 
-Late binding (`dynamic`) feature that came with C# 4.0 still won't be available in Unity, because it relies on CLR 4.0 that we don't have yet.
+Late binding (`dynamic`) feature that came with C# 4.0 still won't be available in Unity.
 
 
 # Ok, what should I do? #
@@ -41,9 +41,9 @@ Thus, the project folder is the only folder that changes. All the other projects
 To make sure that `CSharpCompilerWrapper.exe` does actually work, check its log file: `UnityProject/CSharp60Support/compilation log.txt`
 
 
-# License #
+# Response (.rsp) files #
 
-All the source code is published under [WTFPL version 2](http://www.wtfpl.net/about/).
+If you want to use a response file to pass extra options to the compiler (e.g. `-unsafe`), the file must be named `CSharpCompilerWrapper.rsp`.
 
 
 # What platforms are "supported"? #
@@ -60,6 +60,20 @@ Since WebGL doesn't offer any multithreading support, AsyncBridge and Task Paral
 AsyncBridge/TPL stuff is also not compatible with Windows Store Application platform (and probably all the platforms that use .Net runtime instead of Mono runtime) due to API differences between the recent versions of .Net Framework and the ancient version of TPL (System.Threading.dll) that comes with AsyncBridge. Namely, you can't use async/await, Caller Info attributes and everything from System.Threading.dll (concurrent collections for example).
 
 WebPlayer platform is not supported and most likely will never be since it is about to be deprecated.
+
+
+# Making builds from command line #
+
+If you want to build your project from command line the simple way, it works as usual. For example,
+
+        unity.exe -buildWindows64Player <pathname>
+
+However, if you use [Build Player Pipeline](https://docs.unity3d.com/Manual/BuildPlayerPipeline.html), you'll have to take extra steps, because otherwise the old compiler will be used and the build will fail:
+
+1. Make a copy of `CSharpCompilerWrapper.exe` and place it into `/Unity/Editor/Data/Mono/lib/mono/2.0` on Windows or `/Unity.app/Contents/Frameworks/Mono/lib/mono/2.0` on Mac OS X.
+2. Rename this copy to `smcs.exe`.
+3. Make sure that in the Player Settings the API Compatibility Level option is set to `NET 2.0`.
+
 
 # Other known issues #
 
@@ -112,6 +126,11 @@ WebPlayer platform is not supported and most likely will never be since it is ab
         // assembly reference?
 
     Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
+
+
+# License #
+
+All the source code is published under [WTFPL version 2](http://www.wtfpl.net/about/).
 
 
 # Want to talk about it? #
