@@ -10,3 +10,4 @@ Temp/
 bin/
 obj/
 compilation log.txt
+CSharp60Support/compilation.log
