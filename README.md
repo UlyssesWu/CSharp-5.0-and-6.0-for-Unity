@@ -34,8 +34,6 @@ Thus, the project folder is the only folder that changes. All the other projects
 
     * else if `CSharp60Support` folder contains `mcs.exe`, then this Mono C# 6.0 compiler will be used;
 
-    * else if there's `AsyncBridge.Net35.dll` somewhere inside the project, then Unity's C# 5.0 compiler will be used (`/Unity/Editor/Data/MonoBleedingEdge/lib/mono/4.5/mcs.exe`);
-
     * else the stock compiler will be used (`/Unity/Editor/Data/Mono/lib/mono/2.0/gmcs.exe`).
     
 To make sure that `CSharpCompilerWrapper.exe` does actually work, check its log file: `UnityProject/CSharp60Support/compilation.log`

@@ -50,7 +50,6 @@
     <Compile Include="Logger.cs" />
     <Compile Include="Compilers\Microsoft60Compiler.cs" />
     <Compile Include="Compilers\Mono30Compiler.cs" />
-    <Compile Include="Compilers\Mono50Compiler.cs" />
     <Compile Include="Compilers\Mono60Compiler.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Program.cs" />
