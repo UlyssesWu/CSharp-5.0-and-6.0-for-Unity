@@ -121,13 +121,6 @@ internal class Program
 			}
 		}
 
-		if (compiler == null && compilationOptions.Any(line => line.Contains("AsyncBridge.Net35.dll")))
-		{
-			// Using Mono C# 5.0 compiler
-			var bleedingEdgeCompilerPath = Path.Combine(unityEditorDataDir, @"MonoBleedingEdge/lib/mono/4.5/mcs.exe");
-			compiler = new Mono50Compiler(logger, bleedingEdgeCompilerPath);
-		}
-
 		if (compiler == null)
 		{
 			// Using stock Mono C# 3.0 compiler
