@@ -38,7 +38,7 @@ Thus, the project folder is the only folder that changes. All the other projects
 
     * else the stock compiler will be used (`/Unity/Editor/Data/Mono/lib/mono/2.0/gmcs.exe`).
     
-To make sure that `CSharpCompilerWrapper.exe` does actually work, check its log file: `UnityProject/CSharp60Support/compilation log.txt`
+To make sure that `CSharpCompilerWrapper.exe` does actually work, check its log file: `UnityProject/CSharp60Support/compilation.log`
 
 
 # Response (.rsp) files #
@@ -142,7 +142,7 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
 * Roslyn compiler was taken from VS 2015 installation.
 
-* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.2.3.4][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
+* `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.4.1.0][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
 * AsyncBridge library contains a set of types that makes it possible to use _async/await_ in projects that target CLR 2.0. It also provides Caller Info attributes support. For more information, check [this blog post][asyncbridge].
 
