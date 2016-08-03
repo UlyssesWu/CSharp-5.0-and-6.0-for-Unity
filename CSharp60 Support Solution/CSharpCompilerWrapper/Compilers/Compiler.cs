@@ -97,9 +97,9 @@ internal abstract class Compiler
 			switch (processRuntime)
 			{
 				case ProcessRuntime.CLR40:
-					if (File.Exists("/usr/local/bin/mono"))
+					if (File.Exists("/Library/Frameworks/Mono.framework/Commands/mono"))
 					{
-						runtimePath = "/usr/local/bin/mono";
+						runtimePath = "/Library/Frameworks/Mono.framework/Commands/mono";
 					}
 					else
 					{
