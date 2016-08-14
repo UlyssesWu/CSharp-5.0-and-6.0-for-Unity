@@ -146,9 +146,14 @@ public static class AsyncTools
 		return tcs.Task.GetAwaiter();
 	}
 
-	#region Different awaiters
+    /// <summary>
+    /// Waits for AsyncOperation completion
+    /// </summary>
+    public static AsyncTools.Awaiter GetAwaiter(this AsyncOperation asyncOp) => new AsyncOperationAwaiter(asyncOp);
 
-	public abstract class Awaiter : INotifyCompletion
+    #region Different awaiters
+
+    public abstract class Awaiter : INotifyCompletion
 	{
 		public abstract bool IsCompleted { get; }
 		public abstract void OnCompleted(Action action);
@@ -230,5 +235,30 @@ public static class AsyncTools
 		public override void OnCompleted(Action action) => ThreadPool.QueueUserWorkItem(state => action(), null);
 	}
 
-	#endregion
+    private class AsyncOperationAwaiter : AsyncTools.Awaiter
+    {
+        private readonly AsyncOperation asyncOp;
+        public AsyncOperationAwaiter(AsyncOperation asyncOp)
+        {
+            this.asyncOp = asyncOp;
+        }
+
+        public override bool IsCompleted => asyncOp.isDone;
+        public override void OnCompleted(Action action)
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                while (asyncOp.isDone == false)
+                {
+                    await 0;
+                }
+                action();
+            },
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                UnityScheduler.UpdateScheduler);
+        }
+    }
+
+    #endregion
 }
