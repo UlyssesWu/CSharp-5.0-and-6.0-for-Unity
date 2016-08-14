@@ -231,7 +231,7 @@ public static class AsyncTools
 
 	private class ThreadPoolContextAwaiter : Awaiter
 	{
-		public override bool IsCompleted => false;
+	    public override bool IsCompleted => IsMainThread() == false;
 		public override void OnCompleted(Action action) => ThreadPool.QueueUserWorkItem(state => action(), null);
 	}
 
