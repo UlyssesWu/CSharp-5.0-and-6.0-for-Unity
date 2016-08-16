@@ -41,9 +41,12 @@ internal class Program
 		var compilationOptions = File.ReadAllLines(responseFile.TrimStart('@'));
 		var unityEditorDataDir = GetUnityEditorDataDir();
 		var projectDir = Directory.GetCurrentDirectory();
-		var targetAssembly = compilationOptions.First(line => line.StartsWith("-out:")).Substring(10).Trim('\'');
+		var targetAssembly = compilationOptions.First(line => line.StartsWith("-out:"))
+			.Replace("'", "")
+			.Replace("\"", "")
+			.Substring(10);
 
-		logger?.Append($"CSharpCompilerWrapper.exe version: {Assembly.GetExecutingAssembly().GetName().Version}");
+		logger?.Append($"CSharpCompilerWrapper.exe version: {Assembly.GetExecutingAssembly().GetName().Version} (experimental: Roslyn on MacOS)");
 		logger?.Append($"Platform: {CurrentPlatform}");
 		logger?.Append($"Target assembly: {targetAssembly}");
 		logger?.Append($"Project directory: {projectDir}");
@@ -76,20 +79,35 @@ internal class Program
 			return exitCode;
 		}
 
-		logger?.Append("");
-		logger?.Append("- PDB to MDB conversion --------------------------------------");
-		logger?.Append("");
+		if (CurrentPlatform == Platform.Windows)
+		{
+			logger?.Append("");
+			logger?.Append("- PDB to MDB conversion --------------------------------------");
+			logger?.Append("");
 
-		stopwatch.Reset();
-		stopwatch.Start();
+			stopwatch.Reset();
+			stopwatch.Start();
 
-		var targetAssemblyPath = Path.Combine("Temp", targetAssembly);
-		compiler.ConvertDebugSymbols(CurrentPlatform, targetAssemblyPath, unityEditorDataDir);
+			var targetAssemblyPath = Path.Combine("Temp", targetAssembly);
+			compiler.ConvertDebugSymbols(CurrentPlatform, targetAssemblyPath, unityEditorDataDir);
 
-		stopwatch.Stop();
-		logger?.Append($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
-		logger?.Append("");
-		compiler.PrintPdb2MdbOutputAndErrors();
+			stopwatch.Stop();
+			logger?.Append($"Elapsed time: {stopwatch.ElapsedMilliseconds / 1000f:F2} sec");
+			logger?.Append("");
+			compiler.PrintPdb2MdbOutputAndErrors();
+		}
+		else
+		{
+			var targetAssemblyPath = Path.Combine("Temp", targetAssembly);
+			var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(targetAssemblyPath) + ".pdb");
+			logger?.Append("");
+			logger?.Append("PDB to MDB conversion skipped");
+			if (File.Exists(pdbPath))
+			{
+				File.Delete(pdbPath);
+				logger?.Append($"File \"{pdbPath}\" deleted");
+			}
+		}
 
 		return 0;
 	}
@@ -105,11 +123,11 @@ internal class Program
 			compiler = new Microsoft60Compiler(logger, roslynDirectory);
 		}
 
-		if (compiler != null && platform != Platform.Windows)
-		{
-			compiler = null;
-			logger?.Append("Microsoft C# 6.0 compiler found, but it is not supported on the current platform. Looking for another compiler...");
-		}
+		//if (compiler != null && platform != Platform.Windows)
+		//{
+		//	compiler = null;
+		//	logger?.Append("Microsoft C# 6.0 compiler found, but it is not supported on the current platform. Looking for another compiler...");
+		//}
 
 		if (compiler == null)
 		{
