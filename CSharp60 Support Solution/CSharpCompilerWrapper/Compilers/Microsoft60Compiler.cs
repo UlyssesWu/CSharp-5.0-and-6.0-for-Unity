@@ -16,16 +16,24 @@ internal class Microsoft60Compiler : Compiler
 
 	protected override Process CreateCompilerProcess(Platform platform, string unityEditorDataDir, string responseFile)
 	{
+		if (platform == Platform.Mac)
+		{
+			var filename = responseFile.TrimStart('@');
+			var content = File.ReadAllText(filename);
+			content = content.Replace('\'', '\"');
+			File.WriteAllText(filename, content);
+		}
+
 		var systemDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.dll");
 		var systemCoreDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Core.dll");
 		var systemXmlDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Xml.dll");
 		var mscorlibDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
 
-		string processArguments = "-nostdlib+ -noconfig -nologo "
-								  + $"-r:\"{mscorlibDllPath}\" "
-								  + $"-r:\"{systemDllPath}\" "
-								  + $"-r:\"{systemCoreDllPath}\" "
-								  + $"-r:\"{systemXmlDllPath}\" " + responseFile;
+		string processArguments = $"-nostdlib+ -noconfig -nologo {(platform == Platform.Mac ? "-debug:portable" : "")} "
+								   + $"-r:\"{mscorlibDllPath}\" "
+								   + $"-r:\"{systemDllPath}\" "
+								   + $"-r:\"{systemCoreDllPath}\" "
+								   + $"-r:\"{systemXmlDllPath}\" " + responseFile;
 
 		var process = new Process();
 		process.StartInfo = CreateOSDependentStartInfo(platform, ProcessRuntime.CLR40, compilerPath, processArguments, unityEditorDataDir);
