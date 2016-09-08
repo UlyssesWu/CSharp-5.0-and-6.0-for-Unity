@@ -7,10 +7,14 @@ internal class PropertyInitializerTest : MonoBehaviour
 
 	private void Start()
 	{
-		Debug.Log("Property1 value: " + Property1);
+        Debug.Log("<color=yellow>Property Initializers:</color>");
+
+        Debug.Log("Property1 value: " + Property1);
 		Debug.Log("Property2 value: " + Property2);
 		Property2 = "Bye, World!";
-	}
+
+        Debug.Log("");
+    }
 }
 
 // Mono C# compiler version 4.2.1.0 passes this test:

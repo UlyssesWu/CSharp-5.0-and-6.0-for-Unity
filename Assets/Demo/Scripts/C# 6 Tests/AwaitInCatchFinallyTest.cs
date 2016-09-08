@@ -6,8 +6,11 @@ internal class AwaitInCatchFinallyTest : MonoBehaviour
 {
 	private async void Start()
 	{
-		try
-		{
+        await TaskEx.Delay(500);
+        Debug.Log("<color=yellow>Await in catch/finally:</color>");
+
+        try
+        {
 			throw new NotImplementedException();
 		}
 		catch (NotImplementedException)
@@ -20,5 +23,7 @@ internal class AwaitInCatchFinallyTest : MonoBehaviour
 			await TaskEx.Delay(100);
 			Debug.Log("Inside 'finally'");
 		}
-	}
+
+        Debug.Log("");
+    }
 }
