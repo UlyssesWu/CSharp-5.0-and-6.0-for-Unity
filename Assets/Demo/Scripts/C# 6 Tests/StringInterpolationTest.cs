@@ -5,6 +5,8 @@ internal class StringInterpolationTest : MonoBehaviour
 {
     private void Start()
     {
+        Debug.Log("<color=yellow>String Interpolation:</color>");
+
         var x = 100;
         var y = 200;
 
@@ -12,11 +14,16 @@ internal class StringInterpolationTest : MonoBehaviour
         Debug.Log($"x > y = {x > y}");
 
         var id = 100;
-        var name = "%Alice&";
-	    string url = null; // if 'url' is not initialized here ...
-		Url($"http://foobar/item/{id}/{name}");
-        Debug.Log(url); // ... Mono C# compiler version 4.2.3.0 reports the error CS0165: Use of unassigned local variable `url'
-	}
+        var name = "???Alice???";
+        string simpleUrl = $"http://foobar/item/{id}/{name}";
+        string escapedUrl = Url($"http://foobar/item/{id}/{name}");
+        string escapedUrl2 = Url($"http://foobar/item/{id}/{name:b}");
+        Debug.Log(simpleUrl);
+        Debug.Log(escapedUrl);
+        Debug.Log(escapedUrl2);
+
+        Debug.Log("");
+    }
 
     private static string Url(FormattableString formattable)
     {
@@ -45,9 +52,9 @@ internal class UrlFormatProvider : IFormatProvider
             {
                 return string.Empty;
             }
-            if (format == "r")
+            if (format == "b")
             {
-                return arg.ToString();
+                return arg.ToString().Trim('?') + "-and-Bob";
             }
             return Uri.EscapeDataString(arg.ToString());
         }

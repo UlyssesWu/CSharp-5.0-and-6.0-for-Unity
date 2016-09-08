@@ -4,7 +4,7 @@ public class LocalFunctionsTest : MonoBehaviour
 {
     void Start()
     {
-        Debug.Log("Local Functions:");
+        Debug.Log("<color=yellow>Local Functions:</color>");
 
         var suffix = "!";
 

@@ -11,8 +11,10 @@ internal class ExceptionFiltersTest : MonoBehaviour
 
 	private void Start()
 	{
-		try
-		{
+        Debug.Log("<color=yellow>Exception Filters:</color>");
+
+        try
+        {
 			throw new MyException { Severity = 3 };
 		}
 		catch (MyException ex) when (ex.Severity == 2)
@@ -23,5 +25,7 @@ internal class ExceptionFiltersTest : MonoBehaviour
 		{
 			Debug.Log("Will be executed");
 		}
-	}
+
+        Debug.Log("");
+    }
 }

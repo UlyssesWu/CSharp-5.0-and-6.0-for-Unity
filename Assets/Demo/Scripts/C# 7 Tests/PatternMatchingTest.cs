@@ -4,7 +4,7 @@ public class PatternMatchingTest : MonoBehaviour
 {
     void Start()
     {
-        Debug.Log("Pattern matching:");
+        Debug.Log("<color=yellow>Pattern Matching:</color>");
 
         int? nullable = 10;
         Debug.Log(nullable is int i ? $"not null: {i}" : "is null");
