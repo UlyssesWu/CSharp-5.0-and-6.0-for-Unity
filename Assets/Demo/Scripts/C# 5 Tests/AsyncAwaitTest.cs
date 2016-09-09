@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class AsyncTest : MonoBehaviour
+public class AsyncAwaitTest : MonoBehaviour
 {
 	private async void Start()
 	{

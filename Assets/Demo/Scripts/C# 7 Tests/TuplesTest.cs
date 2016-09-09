@@ -4,7 +4,7 @@ public class TuplesTest : MonoBehaviour
 {
     void Start()
     {
-        Debug.Log("Tuples:");
+        Debug.Log("<color=yellow>Tuples and Deconstruction</color>:");
 
         var i = 10;
         var tuple = GetTuple(i);

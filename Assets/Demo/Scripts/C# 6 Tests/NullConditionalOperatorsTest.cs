@@ -1,6 +1,6 @@
 using UnityEngine;
 
-internal class NullConditionalTest : MonoBehaviour
+internal class NullConditionalOperatorsTest : MonoBehaviour
 {
     private void Start()
     {
