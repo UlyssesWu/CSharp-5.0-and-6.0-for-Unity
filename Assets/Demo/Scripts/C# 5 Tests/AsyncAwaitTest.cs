@@ -3,11 +3,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class AsyncTest : MonoBehaviour
+public class AsyncAwaitTest : MonoBehaviour
 {
 	private async void Start()
 	{
-		PrintThreadId();
+        await TaskEx.Delay(500);
+        Debug.Log("<color=yellow>Async/Await:</color>");
+
+        PrintThreadId();
 
 		for (int i = 0; i < 5; i++)
 		{
@@ -26,9 +29,11 @@ public class AsyncTest : MonoBehaviour
 
 		PrintThreadId();
 		Debug.Log("Finish");
-	}
 
-	private static void PrintThreadId()
+        Debug.Log("");
+    }
+
+    private static void PrintThreadId()
 	{
 		Debug.Log("thread id: " + Thread.CurrentThread.ManagedThreadId);
 	}
