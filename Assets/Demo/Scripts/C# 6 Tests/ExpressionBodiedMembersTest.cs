@@ -9,6 +9,10 @@ internal class ExpressionBodiedMembersTest : MonoBehaviour
 
 	private void Start()
 	{
-		Print("Day of week plus ten: " + DayOfWeekPlusTen);
-	}
+        Debug.Log("<color=yellow>Expression Bodied Members:</color>");
+
+        Print("Day of week plus ten: " + DayOfWeekPlusTen);
+
+        Debug.Log("");
+    }
 }

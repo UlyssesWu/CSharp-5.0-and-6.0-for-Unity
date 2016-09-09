@@ -16,10 +16,10 @@ internal class Microsoft60Compiler : Compiler
 
 	protected override Process CreateCompilerProcess(Platform platform, string unityEditorDataDir, string responseFile)
 	{
-		var systemDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.dll");
-		var systemCoreDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Core.dll");
-		var systemXmlDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Xml.dll");
-		var mscorlibDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
+		string systemDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.dll");
+		string systemCoreDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Core.dll");
+		string systemXmlDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/System.Xml.dll");
+		string mscorlibDllPath = Path.Combine(unityEditorDataDir, @"Mono/lib/mono/2.0/mscorlib.dll");
 
 		string processArguments = "-nostdlib+ -noconfig -nologo "
 								  + $"-r:\"{mscorlibDllPath}\" "
@@ -48,7 +48,7 @@ internal class Microsoft60Compiler : Compiler
 		process.WaitForExit();
 		logger?.Append($"Exit code: {process.ExitCode}");
 
-		var pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(targetAssemblyPath) + ".pdb");
+		string pdbPath = Path.Combine("Temp", Path.GetFileNameWithoutExtension(targetAssemblyPath) + ".pdb");
 		File.Delete(pdbPath);
 	}
 
