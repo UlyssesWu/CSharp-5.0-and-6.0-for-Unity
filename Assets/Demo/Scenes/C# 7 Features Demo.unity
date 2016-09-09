@@ -1096,7 +1096,7 @@ GameObject:
   - 4: {fileID: 1595486421}
   - 114: {fileID: 1595486422}
   m_Layer: 0
-  m_Name: Ref-returns and ref-locals
+  m_Name: Ref Returns and Locals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
