@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using UnityEngine;
 
-internal class ThreadPingPong : MonoBehaviour
+internal class ThreadPingPongDemo : MonoBehaviour
 {
 	public async void AsyncAwaitEventHandler()
 	{

@@ -15,7 +15,10 @@ public class PatternMatchingTest : MonoBehaviour
         Match(12f);
         Match("hi");
         Match("hello world");
-        Match(new GameObject("object"));
+
+        var go = new GameObject("object");
+        go.hideFlags = HideFlags.HideAndDontSave;
+        Match(go);
 
         Debug.Log("");
     }

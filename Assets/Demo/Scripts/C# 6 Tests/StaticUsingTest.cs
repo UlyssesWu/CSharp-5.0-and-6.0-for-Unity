@@ -6,7 +6,11 @@ internal class StaticUsingTest : MonoBehaviour
 {
 	private void Start()
 	{
-		var point = new Vector2(3, 4);
+        Log("<color=yellow>Static Using:</color>");
+
+        var point = new Vector2(3, 4);
 		Log("Distance from (0,0) to (3,4) = " + Distance(zero, point));
-	}
+
+        Log("");
+    }
 }
