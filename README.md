@@ -11,7 +11,7 @@ Late binding (`dynamic`) feature that came with C# 4.0 still won't be available 
 
 1. If you run Unity 4 on Mac OS X, download and install [Mono][mono]. If you don't then don't.
 
-2. Copy `CSharp60Support` folder from this repository (or the [downloads page](https://bitbucket.org/alexzzzz/unity-c-5.0-and-6.0-integration/downloads)) to your Unity project. It should be placed in the project's root, next to the `Assets` folder.
+2. Copy `CSharp60Support` folder from this repository (or the [downloads page][downloads]) to your Unity project. It should be placed in the project's root, next to the `Assets` folder.
 
 3. Import `CSharp60Support for Unity X.unitypackage` into your project. It's located inside `CSharp60Support` folder.
 
@@ -44,6 +44,13 @@ To make sure that `CSharpCompilerWrapper.exe` does actually work, check its log 
 If you want to use a response file to pass extra options to the compiler (e.g. `-unsafe`), the file must be named `CSharpCompilerWrapper.rsp`.
 
 
+# Versions of Roslyn compiler #
+
+Roslyn compiler in C# 7.0 preview packages available on the [downloads page][downloads] is taken from the latest Visual Studio 15 Preview version (currently Preview 4).
+
+Regular packages contain Roslyn from Visual Studio 2015.
+
+
 # What platforms are "supported"? #
 
 This hack seems to work on the major platforms:
@@ -52,6 +59,8 @@ This hack seems to work on the major platforms:
 * Mac OS X (editor and standalone)
 * Android
 * iOS
+
+Roslyn can't write pdb debug information files on Mac OS. This means that you can compile C# with Roslyn on MacOS if you want, but if you do you won't be able to debug it. By default Roslyn is disabled on Mac OS and Mono C# 6.0 compiler is used unless you've installed a special package from the [downloads page][downloads] with "Roslyn on Mac OS" support.
 
 Since WebGL doesn't offer any multithreading support, AsyncBridge and Task Parallel Library are not available for this platform. Caller Info attributes are also not available, because their support comes with AsyncBridge library.
 
@@ -114,16 +123,13 @@ However, if you use [Build Player Pipeline](https://docs.unity3d.com/Manual/Buil
         }
 
 
-* There's a bug in Mono C# 6.0 compiler, related to null-conditional operator support (NullConditionalTest.cs):
+* There's a bug in Mono C# 6.0 compiler related to null-conditional operator support (NullConditionalTest.cs):
 
-        var foo = new[] { 1, 2, 3 };
-        var bar = foo?[0];
-        Debug.Log((foo?[0]).HasValue); // error CS1061: Type `int' does not 
-        // contain a definition for `HasValue' and no extension method
-        // `HasValue' of type `int' could be found. Are you missing an
-        // assembly reference?
-
-    Mono compiler thinks that `foo?[0]` is `int` while it's actually `Nullable<int>`. However, `bar`'s type is deduced correctly - `Nullable<int>`. 
+        int[] array = new[] { 0, 1, 2, 3 };
+        int? item = array?[0];
+        bool foo = (array?[0]).HasValue; // error CS0266:
+        // Cannot implicitly convert type `bool?' to `bool'.
+        // An explicit conversion exists (are you missing a cast?)
 
 
 # License #
@@ -137,8 +143,6 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 
    
 # Random notes #
-
-* Roslyn compiler was taken from VS 2015 installation.
 
 * `mcs.exe`, `pdb2mdb.exe` and its dependencies were taken from [Mono 4.4.1.0][mono] installation. pdb2mdb.exe that comes with Unity is not compatible with the assemblies generated with Roslyn compiler.
 
@@ -158,3 +162,4 @@ http://forum.unity3d.com/threads/c-6-0.314297/#post-2108999
 [synccontext2]: http://blogs.msdn.com/b/pfxteam/archive/2012/01/21/10259307.aspx
 [synccontext3]: http://blogs.msdn.com/b/pfxteam/archive/2012/02/02/await-synchronizationcontext-and-console-apps-part-3.aspx
 [ngen]: https://msdn.microsoft.com/en-us/library/6t9t5wcf%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
+[downloads]:https://bitbucket.org/alexzzzz/unity-c-5.0-and-6.0-integration/downloads
